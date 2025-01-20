@@ -89,9 +89,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     try {
       setLoading(true);
       if (initialData) {
-        // await axios.post(`/api/products/edit-product/${initialData._id}`, data);
+        // await axios.post(`/api/contracts/edit-product/${initialData._id}`, data);
       } else {
-        // const res = await axios.post(`/api/products/create-product`, data);
+        // const res = await axios.post(`/api/contracts/create-product`, data);
         // console.log("product", res);
       }
       router.refresh();
@@ -105,7 +105,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const onDelete = async () => {
     try {
       setLoading(true);
-      //   await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
+      //   await axios.delete(`/api/${params.storeId}/contracts/${params.productId}`);
       router.refresh();
       router.push(`/${params.storeId}/contracts`);
     } catch (error: any) {

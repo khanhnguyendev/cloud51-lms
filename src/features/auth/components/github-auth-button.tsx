@@ -18,8 +18,8 @@ export default function GithubSignInButton() {
         signIn('google', { callbackUrl: callbackUrl ?? '/dashboard' })
       }
     >
-      <Icons.gitHub className='mr-2 h-4 w-4' />
-      Continue with Google
+      <Icons.google className='mr-4 h-4 w-4' />
+      <span className='ml-2'>Sign in with Google</span>
     </Button>
   );
 }
