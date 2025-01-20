@@ -47,9 +47,9 @@ import * as React from 'react';
 import { Icons } from '../icons';
 
 export const company = {
-  name: 'khanhnguyendev',
+  name: 'Cloud51',
   logo: GalleryVerticalEnd,
-  plan: 'template'
+  plan: 'Quản lý hợp đồng'
 };
 
 export default function AppSidebar() {

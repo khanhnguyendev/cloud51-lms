@@ -1,20 +1,25 @@
 import { NavItem } from 'types';
 
-export type Product = {
-  photo_url: string;
-  name: string;
-  description: string;
-  created_at: string;
-  price: number;
+export type Contract = {
+  contractDate: string;
+  contractCode: string;
+  contractType: 'loan' | 'lease';
+  deviceType: string;
+  deviceImei: string;
+  totalAmount: number;
+  fee: number;
+  note: string;
   id: number;
-  category: string;
+  user: string;
+  transactions: string[];
+  created_at: string;
   updated_at: string;
 };
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
 export const navItems: NavItem[] = [
   {
-    title: 'Dashboard',
+    title: 'Tổng quan',
     url: '/dashboard/overview',
     icon: 'dashboard',
     isActive: false,
@@ -22,15 +27,15 @@ export const navItems: NavItem[] = [
     items: [] // Empty array as there are no child items for Dashboard
   },
   {
-    title: 'Product',
-    url: '/dashboard/product',
+    title: 'Hợp đồng',
+    url: '/dashboard/contract',
     icon: 'product',
     shortcut: ['p', 'p'],
     isActive: false,
     items: [] // No child items
   },
   {
-    title: 'Account',
+    title: 'Tài khoản',
     url: '#', // Placeholder as there is no direct link for the parent
     icon: 'billing',
     isActive: true,
@@ -49,15 +54,15 @@ export const navItems: NavItem[] = [
         icon: 'login'
       }
     ]
-  },
-  {
-    title: 'Kanban',
-    url: '/dashboard/kanban',
-    icon: 'kanban',
-    shortcut: ['k', 'k'],
-    isActive: false,
-    items: [] // No child items
   }
+  // {
+  //   title: 'Kanban',
+  //   url: '/dashboard/kanban',
+  //   icon: 'kanban',
+  //   shortcut: ['k', 'k'],
+  //   isActive: false,
+  //   items: [] // No child items
+  // }
 ];
 
 export interface SaleUser {

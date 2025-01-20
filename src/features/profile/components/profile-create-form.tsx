@@ -95,7 +95,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         // console.log("product", res);
       }
       router.refresh();
-      router.push(`/dashboard/products`);
+      router.push(`/dashboard/contracts`);
     } catch (error: any) {
     } finally {
       setLoading(false);
@@ -107,7 +107,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       setLoading(true);
       //   await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
       router.refresh();
-      router.push(`/${params.storeId}/products`);
+      router.push(`/${params.storeId}/contracts`);
     } catch (error: any) {
     } finally {
       setLoading(false);

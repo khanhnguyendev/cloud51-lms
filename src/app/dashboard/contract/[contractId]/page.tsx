@@ -1,13 +1,13 @@
 import FormCardSkeleton from '@/components/form-card-skeleton';
 import PageContainer from '@/components/layout/page-container';
 import { Suspense } from 'react';
-import ProductViewPage from '@/features/products/components/product-view-page';
+import ContractViewPage from '@/features/contracts/components/contract-view-page';
 
 export const metadata = {
   title: 'Dashboard : Contract View'
 };
 
-type PageProps = { params: Promise<{ productId: string }> };
+type PageProps = { params: Promise<{ contractId: string }> };
 
 export default async function Page(props: PageProps) {
   const params = await props.params;
@@ -15,7 +15,7 @@ export default async function Page(props: PageProps) {
     <PageContainer scrollable>
       <div className='flex-1 space-y-4'>
         <Suspense fallback={<FormCardSkeleton />}>
-          <ProductViewPage productId={params.productId} />
+          <ContractViewPage contractId={params.contractId} />
         </Suspense>
       </div>
     </PageContainer>

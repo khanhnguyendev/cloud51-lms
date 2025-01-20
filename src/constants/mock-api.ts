@@ -1,116 +1,165 @@
-////////////////////////////////////////////////////////////////////////////////
-// 🛑 Nothing in here has anything to do with Nextjs, it's just a fake database
-////////////////////////////////////////////////////////////////////////////////
-
 import { faker } from '@faker-js/faker';
 import { matchSorter } from 'match-sorter'; // For filtering
 
 export const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-// Define the shape of Product data
-export type Product = {
-  photo_url: string;
-  name: string;
-  description: string;
-  created_at: string;
-  price: number;
+// Define the shape of Contract data
+export type Contract = {
+  contractDate: string;
+  contractCode: string;
+  contractType: 'loan' | 'lease';
+  deviceType: string;
+  deviceImei: string;
+  totalAmount: number;
+  fee: number;
+  note: string;
   id: number;
-  category: string;
+  user: string;
+  transactions: string[];
+  created_at: string;
   updated_at: string;
 };
 
-// Mock product data store
-export const fakeProducts = {
-  records: [] as Product[], // Holds the list of product objects
+// Mock contract data store
+export const fakeContracts = {
+  records: [] as Contract[], // Holds the list of contract objects
 
   // Initialize with sample data
   initialize() {
-    const sampleProducts: Product[] = [];
-    function generateRandomProductData(id: number): Product {
-      const categories = [
-        'Electronics',
-        'Furniture',
-        'Clothing',
-        'Toys',
-        'Groceries',
-        'Books',
-        'Jewelry',
-        'Beauty Contracts'
+    const sampleContracts: Contract[] = [];
+    function generateRandomContractData(id: number): Contract {
+      const contractTypes: readonly ('loan' | 'lease')[] = ['loan', 'lease'];
+      const deviceTypes = [
+        'iPhone 16',
+        'iPhone 16 Plus',
+        'iPhone 16 Pro',
+        'iPhone 16 Pro Max',
+        'iPhone 15',
+        'iPhone 15 Plus',
+        'iPhone 15 Pro',
+        'iPhone 15 Pro Max',
+        'iPhone 14',
+        'iPhone 14 Plus',
+        'iPhone 14 Pro',
+        'iPhone 14 Pro Max',
+        'iPhone 13',
+        'iPhone 13 Mini',
+        'iPhone 13 Pro',
+        'iPhone 13 Pro Max',
+        'iPhone 12',
+        'iPhone 12 Mini',
+        'iPhone 12 Pro',
+        'iPhone 12 Pro Max',
+        'iPhone 11',
+        'iPhone 11 Pro',
+        'iPhone 11 Pro Max'
       ];
 
       return {
         id,
-        name: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
-        created_at: faker.date
+        contractDate: faker.date
           .between({ from: '2022-01-01', to: '2023-12-31' })
           .toISOString(),
-        price: parseFloat(faker.commerce.price({ min: 5, max: 500, dec: 2 })),
-        photo_url: `https://api.slingacademy.com/public/sample-products/${id}.png`,
-        category: faker.helpers.arrayElement(categories),
+        contractCode: faker.string.uuid(),
+        contractType: faker.helpers.arrayElement<'loan' | 'lease'>(
+          contractTypes
+        ),
+        deviceType: faker.helpers.arrayElement(deviceTypes),
+        deviceImei: faker.phone.imei(),
+
+        totalAmount:
+          Math.floor(
+            faker.number.int({
+              min: 1000000,
+              max: 10000000,
+              multipleOf: 500000
+            }) / 500000
+          ) * 500000,
+        fee: Math.max(
+          200000,
+          Math.floor(
+            faker.number.int({
+              min: 1000000,
+              max: 10000000,
+              multipleOf: 500000
+            }) / 500000
+          ) *
+            500000 *
+            0.1
+        ),
+
+        note: faker.helpers.arrayElement([
+          'Hợp đồng này được ký kết giữa hai bên.',
+          'Sản phẩm đã được kiểm tra và đáp ứng tiêu chuẩn chất lượng.',
+          'Khách hàng sẽ nhận được hỗ trợ trong vòng 24 giờ.',
+          'Điều kiện thanh toán đã được thống nhất giữa các bên.',
+          'Hợp đồng có hiệu lực ngay khi được ký kết.'
+        ]), // Vietnamese notes
+        user: faker.string.uuid(),
+        transactions: Array.from(
+          { length: faker.number.int({ min: 1, max: 5 }) },
+          () => faker.string.uuid()
+        ),
+        created_at: faker.date.past().toISOString(),
         updated_at: faker.date.recent().toISOString()
       };
     }
 
     // Generate remaining records
     for (let i = 1; i <= 20; i++) {
-      sampleProducts.push(generateRandomProductData(i));
+      sampleContracts.push(generateRandomContractData(i));
     }
 
-    this.records = sampleProducts;
+    this.records = sampleContracts;
   },
 
-  // Get all products with optional category filtering and search
+  // Get all contracts with optional filtering and search
   async getAll({
-    categories = [],
+    contractType,
     search
   }: {
-    categories?: string[];
+    contractType?: string;
     search?: string;
   }) {
-    let products = [...this.records];
+    let contracts = [...this.records];
 
-    // Filter products based on selected categories
-    if (categories.length > 0) {
-      products = products.filter((product) =>
-        categories.includes(product.category)
+    // Filter contracts based on contractType
+    if (contractType) {
+      contracts = contracts.filter(
+        (contract) => contract.contractType === contractType
       );
     }
 
     // Search functionality across multiple fields
     if (search) {
-      products = matchSorter(products, search, {
-        keys: ['name', 'description', 'category']
+      contracts = matchSorter(contracts, search, {
+        keys: ['contractCode', 'deviceType', 'note']
       });
     }
 
-    return products;
+    return contracts;
   },
 
-  // Get paginated results with optional category filtering and search
-  async getProducts({
+  // Get paginated results with optional filtering and search
+  async getContracts({
     page = 1,
     limit = 10,
-    categories,
+    contractType,
     search
   }: {
     page?: number;
     limit?: number;
-    categories?: string;
+    contractType?: string;
     search?: string;
   }) {
     await delay(1000);
-    const categoriesArray = categories ? categories.split('.') : [];
-    const allProducts = await this.getAll({
-      categories: categoriesArray,
-      search
-    });
-    const totalProducts = allProducts.length;
+    const allContracts = await this.getAll({ contractType, search });
+    const totalContracts = allContracts.length;
 
     // Pagination logic
     const offset = (page - 1) * limit;
-    const paginatedProducts = allProducts.slice(offset, offset + limit);
+    const paginatedContracts = allContracts.slice(offset, offset + limit);
 
     // Mock current time
     const currentTime = new Date().toISOString();
@@ -119,25 +168,25 @@ export const fakeProducts = {
     return {
       success: true,
       time: currentTime,
-      message: 'Sample data for testing and learning purposes',
-      total_products: totalProducts,
+      message: 'Sample contract data for testing and learning purposes',
+      total_contracts: totalContracts,
       offset,
       limit,
-      products: paginatedProducts
+      contracts: paginatedContracts
     };
   },
 
-  // Get a specific product by its ID
-  async getProductById(id: number) {
+  // Get a specific contract by its ID
+  async getContractById(id: number) {
     await delay(1000); // Simulate a delay
 
-    // Find the product by its ID
-    const product = this.records.find((product) => product.id === id);
+    // Find the contract by its ID
+    const contract = this.records.find((contract) => contract.id === id);
 
-    if (!product) {
+    if (!contract) {
       return {
         success: false,
-        message: `Product with ID ${id} not found`
+        message: `Contract with ID ${id} not found`
       };
     }
 
@@ -147,11 +196,11 @@ export const fakeProducts = {
     return {
       success: true,
       time: currentTime,
-      message: `Product with ID ${id} found`,
-      product
+      message: `Contract with ID ${id} found`,
+      contract
     };
   }
 };
 
-// Initialize sample products
-fakeProducts.initialize();
+// Initialize sample contracts
+fakeContracts.initialize();
