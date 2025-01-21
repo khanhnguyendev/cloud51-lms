@@ -162,187 +162,193 @@ export default function ContractForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
-            <FormField
-              control={form.control}
-              name='contractDate'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ngày tạo hợp đồng</FormLabel>
-                  <FormControl>
-                    <Input type='date' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='phone'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Số điện thoại</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Nhập số điện thoại' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='contractCode'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mã hợp đồng</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Nhập mã hợp đồng' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='contractType'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Loại hợp đồng</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(value)}
-                    value={field.value}
-                  >
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className='space-y-2'>
+              <FormField
+                control={form.control}
+                name='contractDate'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ngày tạo hợp đồng</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Chọn loại hợp đồng' />
-                      </SelectTrigger>
+                      <Input type='date' {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value='loan'>Vay</SelectItem>
-                      <SelectItem value='lease'>Góp</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='deviceType'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Loại thiết bị</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(value)}
-                    value={field.value}
-                  >
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='phone'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Số điện thoại</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Chọn loại thiết bị' />
-                      </SelectTrigger>
+                      <Input placeholder='Nhập số điện thoại' {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {deviceTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='deviceImei'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>IMEI thiết bị</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Nhập IMEI thiết bị' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='totalAmount'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Số tiền tổng</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value?.toString() || ''}
-                  >
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='contractCode'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mã hợp đồng</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Chọn số tiền tổng' />
-                      </SelectTrigger>
+                      <Input placeholder='Nhập mã hợp đồng' {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {Array.from(
-                        { length: (10000000 - 1000000) / 500000 + 1 },
-                        (_, index) => 1000000 + index * 500000
-                      ).map((amount) => (
-                        <SelectItem key={amount} value={amount.toString()}>
-                          {amount.toLocaleString()} VND
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormItem>
-              <FormLabel>Phí (10%)</FormLabel>
-              <div>{fee.toLocaleString()} VND</div>
-            </FormItem>
-            <FormItem>
-              <FormLabel className='text-gray-800 dark:text-gray-200'>
-                Các kỳ trả góp
-              </FormLabel>
-              <div
-                className={`grid gap-4 ${
-                  form.watch('contractType') === 'loan'
-                    ? 'grid-cols-4'
-                    : 'grid-cols-4 grid-rows-2'
-                }`}
-              >
-                {installments.map((installment, index) => (
-                  <div
-                    key={index}
-                    className='rounded-md border bg-white p-4 shadow-md transition-shadow duration-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800'
-                  >
-                    <p className='font-bold text-gray-800 dark:text-gray-100'>
-                      Kỳ {index + 1}
-                    </p>
-                    <p className='font-bold text-red-600 dark:text-red-400'>
-                      {installment.amount.toLocaleString()} VND
-                    </p>
-                    <p className='text-gray-600 dark:text-gray-400'>
-                      {installment.date}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </FormItem>
-            <FormField
-              control={form.control}
-              name='note'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ghi chú</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Nhập ghi chú' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type='submit'>Gửi hợp đồng</Button>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='contractType'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Loại hợp đồng</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value)}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Chọn loại hợp đồng' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value='loan'>Vay</SelectItem>
+                        <SelectItem value='lease'>Góp</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='deviceType'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Loại thiết bị</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value)}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Chọn loại thiết bị' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {deviceTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='deviceImei'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>IMEI thiết bị</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Nhập IMEI thiết bị' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='totalAmount'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Số tiền tổng</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(Number(value))}
+                      value={field.value?.toString() || ''}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Chọn số tiền tổng' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from(
+                          { length: (10000000 - 1000000) / 500000 + 1 },
+                          (_, index) => 1000000 + index * 500000
+                        ).map((amount) => (
+                          <SelectItem key={amount} value={amount.toString()}>
+                            {amount.toLocaleString()} VND
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormItem>
+                <FormLabel>Phí (10%)</FormLabel>
+                <div>{fee.toLocaleString()} VND</div>
+              </FormItem>
+              <FormItem>
+                <FormLabel className='text-gray-800 dark:text-gray-200'>
+                  Các kỳ trả góp
+                </FormLabel>
+                <div
+                  className={`grid gap-4 ${
+                    form.watch('contractType') === 'loan'
+                      ? 'grid-cols-4'
+                      : 'grid-cols-4 grid-rows-2'
+                  }`}
+                >
+                  {installments.map((installment, index) => (
+                    <div
+                      key={index}
+                      className='rounded-md border bg-white p-4 shadow-md transition-shadow duration-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800'
+                    >
+                      <p className='font-bold text-gray-800 dark:text-gray-100'>
+                        Kỳ {index + 1}
+                      </p>
+                      <p className='font-bold text-red-600 dark:text-red-400'>
+                        {installment.amount.toLocaleString()} VND
+                      </p>
+                      <p className='text-gray-600 dark:text-gray-400'>
+                        {installment.date}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </FormItem>
+              <FormField
+                control={form.control}
+                name='note'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ghi chú</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Nhập ghi chú' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className='mt-6'>
+              <Button variant='destructive' className='' type='submit'>
+                Tạo hợp đồng
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
