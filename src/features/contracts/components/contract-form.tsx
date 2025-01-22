@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 import {
   Form,
   FormControl,
@@ -22,6 +23,9 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { CONTRACTS_API } from '@/constants/route-api';
+import { useRouter } from 'next/navigation';
+import { IContract } from '@/models/contract';
 
 const formSchema = z.object({
   contractDate: z
@@ -39,7 +43,8 @@ const formSchema = z.object({
   totalAmount: z
     .number()
     .positive({ message: 'Số tiền tổng phải là một số dương.' }),
-  phone: z
+  customerName: z.string().min(2, { message: 'Tên KH là bắt buộc' }),
+  customerPhone: z
     .string()
     .regex(/^\d{10}$/, {
       message: 'Số điện thoại phải là số hợp lệ gồm 10 chữ số.'
@@ -55,6 +60,8 @@ export default function ContractForm({
   initialData: any;
   pageTitle: string;
 }) {
+  const router = useRouter();
+
   const [fee, setFee] = useState(0);
   const [installments, setInstallments] = useState<
     { amount: number; date: string }[]
@@ -93,7 +100,8 @@ export default function ContractForm({
     deviceType: initialData?.deviceType || '',
     deviceImei: initialData?.deviceImei || '',
     totalAmount: initialData?.totalAmount || 1000000,
-    phone: initialData?.phone || '',
+    customerName: initialData?.customerName || '',
+    customerPhone: initialData?.customerPhone || '',
     note: initialData?.note || ''
   };
 
@@ -145,11 +153,32 @@ export default function ContractForm({
     setInstallments(installmentArray);
   };
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({
-      ...values,
-      fee,
-      installments
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const dataToSubmit = { ...values };
+
+    const createContract = async () => {
+      const response = await fetch(CONTRACTS_API.CREATE_CONTRACT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSubmit)
+      });
+
+      if (!response.ok) {
+        const errorRes = await response.json();
+        throw new Error(errorRes?.error || 'Unknown error occurred');
+      }
+
+      const result = await response.json();
+      return result.message;
+    };
+
+    toast.promise(createContract(), {
+      loading: 'Đang tạo hợp đồng...',
+      success: (contract: IContract) => {
+        router.push(`/dashboard/contract/${contract._id}`);
+        return 'Hợp đồng được tạo thành công!';
+      },
+      error: (error: Error) => error.message || 'Tạo hợp đồng thất bại!'
     });
   };
 
@@ -179,7 +208,20 @@ export default function ContractForm({
               />
               <FormField
                 control={form.control}
-                name='phone'
+                name='customerName'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tên KH</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Nhập tên KH' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='customerPhone'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Số điện thoại</FormLabel>

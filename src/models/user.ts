@@ -29,12 +29,11 @@ const UserSchema: Schema = new mongoose.Schema(
       required: true
     },
     password: {
-      type: String,
-      required: true
+      type: String
     },
     role: {
       type: String,
-      enum: ['admin', 'staff', 'guest'],
+      enum: ['admin', 'staff', 'guest', 'client', 'vip'],
       default: 'guest'
     },
     isActive: {
