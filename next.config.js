@@ -14,7 +14,15 @@ const nextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist']
+  transpilePackages: ['geist'],
+  logging: {
+    fetches: {
+      incomingRequests: {
+        ignore: [/\api\/v1\/health/]
+      },
+      fullUrl: true
+    }
+  }
 };
 
 module.exports = nextConfig;
