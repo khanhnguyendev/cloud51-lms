@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { ClientSession } from 'mongoose';
 
 const MONGODB_URI: string = process.env.MONGODB_URI!;
 
@@ -40,4 +40,25 @@ async function dbConnect() {
   return cached.conn;
 }
 
-export default dbConnect;
+async function createSession() {
+  const db = await dbConnect();
+  const session = db.startSession();
+  console.log(`[DB] Session started with id: ${(await session).id}`);
+  return session;
+}
+
+async function rollback(session: ClientSession) {
+  try {
+    await session.abortTransaction();
+    console.log(
+      `[DB] Transaction aborted successfully for session id: ${session.id}`
+    );
+  } catch (error) {
+    console.error('[DB] Failed to abort transaction:', error);
+  } finally {
+    console.log(`[DB] Ending session with id: ${session.id}`);
+    session.endSession();
+  }
+}
+
+export { dbConnect, createSession, rollback };
