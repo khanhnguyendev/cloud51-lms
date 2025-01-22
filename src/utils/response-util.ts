@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import { CustomError } from '@/utils/exceptions/CustomError';
 
 export const HTTP_STATUS_CODES = {
   OK: 200,
@@ -32,12 +33,10 @@ export function errorResponse(
   error: string,
   errorDetail: string
 ) {
-  return NextResponse.json({
-    statusCode,
-    error,
-    errorDetail,
-    timestamp: new Date().toString()
-  });
+  return NextResponse.json(
+    { statusCode, error, errorDetail, timestamp: new Date().toString() },
+    { status: statusCode }
+  );
 }
 
 export function handleError(error: Error | any) {
@@ -48,7 +47,6 @@ export function handleError(error: Error | any) {
     ? `An error occurred (${errorCode})`
     : error.stack || 'No stack trace available';
 
-  // Structured log for better debugging
   console.log({
     level: 'error',
     environment: process.env.NODE_ENV || 'development',
@@ -56,6 +54,14 @@ export function handleError(error: Error | any) {
     errorMessage: error.message,
     stackTrace: isProduction ? undefined : error.stack
   });
+
+  if (error instanceof CustomError) {
+    return errorResponse(
+      error.statusCode,
+      error.message,
+      `${error.constructor.name}: ${error.message}`
+    );
+  }
 
   return errorResponse(
     HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR,
