@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IContract extends Document {
-  _id: number;
+  _id: string;
   contractDate: string;
   contractCode: string;
   contractType: 'loan' | 'lease';

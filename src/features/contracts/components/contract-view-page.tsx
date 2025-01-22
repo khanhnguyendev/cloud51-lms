@@ -13,7 +13,7 @@ export default async function ContractViewPage({
   let contract: IContract | null = null;
   let pageTitle = 'Tạo mới hợp đồng';
 
-  if (contractId) {
+  if (contractId && contractId !== 'new') {
     try {
       const data = await fetchContractById(contractId);
       contract = data as IContract;

@@ -93,9 +93,9 @@ export default function ContractForm({
   ];
 
   const defaultValues = {
-    contractDate:
-      new Date(initialData?.contractDate).toISOString().split('T')[0] ||
-      new Date().toISOString().split('T')[0],
+    contractDate: initialData?.contractDate
+      ? new Date(initialData?.contractDate).toISOString().split('T')[0]
+      : initialData?.contractDate || new Date().toISOString().split('T')[0],
     contractCode: initialData?.contractCode || '',
     contractType: initialData?.contractType || 'loan',
     deviceType: initialData?.deviceType || '',
