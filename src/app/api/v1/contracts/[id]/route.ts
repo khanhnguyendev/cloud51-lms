@@ -1,4 +1,4 @@
-import dbConnect from '@/lib/db';
+import { dbConnect } from '@/lib/db';
 import { Contract } from '@/models/contract';
 import {
   errorResponse,

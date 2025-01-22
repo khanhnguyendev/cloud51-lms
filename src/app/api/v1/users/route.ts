@@ -1,4 +1,4 @@
-import dbConnect from '@/lib/db';
+import { dbConnect } from '@/lib/db';
 import { User } from '@/models/user';
 import { success, HTTP_STATUS_CODES, handleError } from '@/utils/response-util';
 

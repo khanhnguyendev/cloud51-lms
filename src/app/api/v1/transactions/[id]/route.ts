@@ -1,5 +1,4 @@
-import dbConnect from '@/lib/db';
-import { Contract } from '@/models/contract';
+import { dbConnect } from '@/lib/db';
 import { Transaction } from '@/models/transaction';
 import {
   errorResponse,
