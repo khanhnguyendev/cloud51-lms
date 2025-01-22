@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IContract extends Document {
-  contractDate: Date;
+  _id: number;
+  contractDate: string;
   contractCode: string;
-  contractType: string;
+  contractType: 'loan' | 'lease';
   deviceType: string;
   deviceImei: string;
   totalAmount: number;
@@ -11,8 +12,8 @@ export interface IContract extends Document {
   note: string;
   transactions: string[];
   user: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const ContractSchema: Schema = new mongoose.Schema(

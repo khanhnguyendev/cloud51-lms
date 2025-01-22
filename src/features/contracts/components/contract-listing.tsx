@@ -1,8 +1,8 @@
-import { Contract } from '@/constants/data';
-import { fakeContracts } from '@/constants/mock-api';
 import { searchParamsCache } from '@/lib/searchparams';
 import { DataTable as ContractTable } from '@/components/ui/table/data-table';
 import { columns } from './contract-tables/columns';
+import { fetchContracts } from '../utils/contracts-service';
+import { IContract } from '@/models/contract';
 
 type ContractListingPage = {};
 
@@ -11,18 +11,16 @@ export default async function ContractListingPage({}: ContractListingPage) {
   const page = searchParamsCache.get('page');
   const search = searchParamsCache.get('q');
   const pageLimit = searchParamsCache.get('limit');
-  const categories = searchParamsCache.get('categories');
 
   const filters = {
     page,
     limit: pageLimit,
-    ...(search && { search }),
-    ...(categories && { categories: categories })
+    ...(search && { search })
   };
 
-  const data = await fakeContracts.getContracts(filters);
+  const data = await fetchContracts(filters);
   const totalContracts = data.total_contracts;
-  const contracts: Contract[] = data.contracts;
+  const contracts = data.contracts;
 
   return (
     <ContractTable

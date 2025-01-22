@@ -1,6 +1,7 @@
-import { fakeContracts, Contract } from '@/constants/mock-api';
 import { notFound } from 'next/navigation';
 import ContractForm from './contract-form';
+import { fetchContractById } from '@/features/contracts/utils/contracts-service';
+import { IContract } from '@/models/contract';
 
 type TContractViewPageProps = {
   contractId: string;
@@ -9,16 +10,23 @@ type TContractViewPageProps = {
 export default async function ContractViewPage({
   contractId
 }: TContractViewPageProps) {
-  let contract = null;
+  let contract: IContract | null = null;
   let pageTitle = 'Tạo mới hợp đồng';
 
-  if (contractId !== 'new') {
-    const data = await fakeContracts.getContractById(Number(contractId));
-    contract = data.contract as Contract;
-    if (!contract) {
+  if (contractId) {
+    try {
+      const data = await fetchContractById(contractId);
+      contract = data as IContract;
+
+      if (!contract) {
+        notFound();
+      }
+
+      pageTitle = `Chỉnh sửa hợp đồng`;
+    } catch (error) {
+      console.error('Failed to fetch contract:', error);
       notFound();
     }
-    pageTitle = `Chỉnh sửa hợp đồng`;
   }
 
   return <ContractForm initialData={contract} pageTitle={pageTitle} />;

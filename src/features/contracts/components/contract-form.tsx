@@ -94,14 +94,15 @@ export default function ContractForm({
 
   const defaultValues = {
     contractDate:
-      initialData?.contractDate || new Date().toISOString().split('T')[0],
+      new Date(initialData?.contractDate).toISOString().split('T')[0] ||
+      new Date().toISOString().split('T')[0],
     contractCode: initialData?.contractCode || '',
     contractType: initialData?.contractType || 'loan',
     deviceType: initialData?.deviceType || '',
     deviceImei: initialData?.deviceImei || '',
     totalAmount: initialData?.totalAmount || 1000000,
-    customerName: initialData?.customerName || '',
-    customerPhone: initialData?.customerPhone || '',
+    customerName: initialData?.user?.name || '',
+    customerPhone: initialData?.user?.phones[0]?.number || '',
     note: initialData?.note || ''
   };
 

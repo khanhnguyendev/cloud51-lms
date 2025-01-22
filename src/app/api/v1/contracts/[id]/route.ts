@@ -15,8 +15,9 @@ export async function GET(
     const contractId = (await params).id;
 
     await dbConnect();
-    const contract =
-      await Contract.findById(contractId).populate('transactions');
+    const contract = await Contract.findById(contractId)
+      .populate('transactions')
+      .populate('user');
 
     if (!contract) {
       return errorResponse(

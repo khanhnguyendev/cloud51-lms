@@ -161,14 +161,8 @@ export const fakeContracts = {
     const offset = (page - 1) * limit;
     const paginatedContracts = allContracts.slice(offset, offset + limit);
 
-    // Mock current time
-    const currentTime = new Date().toISOString();
-
     // Return paginated response
     return {
-      success: true,
-      time: currentTime,
-      message: 'Sample contract data for testing and learning purposes',
       total_contracts: totalContracts,
       offset,
       limit,

@@ -1,10 +1,10 @@
 'use client';
 
-import { Contract } from '@/constants/mock-api';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
+import { IContract } from '@/models/contract';
 
-export const columns: ColumnDef<Contract>[] = [
+export const columns: ColumnDef<IContract>[] = [
   {
     accessorKey: 'contractDate',
     header: 'CONTRACT DATE',

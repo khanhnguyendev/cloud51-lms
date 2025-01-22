@@ -17,6 +17,7 @@ import { IUser, User } from '@/models/user';
 import { BadRequestError } from '@/utils/exceptions/BadRequestException';
 import { HTTP_STATUS_CODES, success, handleError } from '@/utils/response-util';
 import { ClientSession } from 'mongoose';
+import { type NextRequest } from 'next/server';
 
 type createContractReq = {
   contractDate: string;
@@ -30,12 +31,89 @@ type createContractReq = {
   note: string;
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    await dbConnect();
-    const contracts = await Contract.find();
+    const searchParams = req.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('q');
 
-    return success(HTTP_STATUS_CODES.OK, contracts);
+    const skip = (page - 1) * limit;
+
+    await dbConnect();
+    let contracts;
+    let totalContracts;
+
+    if (search) {
+      contracts = await Contract.aggregate([
+        {
+          $lookup: {
+            from: 'users', // Reference to the User collection
+            localField: 'user', // Field in Contract that references User
+            foreignField: '_id', // _id field in User collection
+            as: 'userDetails' // Alias for user data
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { contractCode: { $regex: search, $options: 'i' } }, // Search in contractCode
+              { deviceType: { $regex: search, $options: 'i' } }, // Search in deviceType
+              { deviceImei: { $regex: search, $options: 'i' } }, // Search in deviceImei
+              { note: { $regex: search, $options: 'i' } }, // Search in note
+              { 'userDetails.name': { $regex: search, $options: 'i' } }, // Search in user's name
+              {
+                'userDetails.phones.number': { $regex: search, $options: 'i' }
+              }, // Search in user's phone number
+              { 'userDetails.address': { $regex: search, $options: 'i' } } // Search in user's address
+            ]
+          }
+        },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+
+      totalContracts = await Contract.aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'userDetails'
+          }
+        },
+        {
+          $match: {
+            $or: [
+              { contractCode: { $regex: search, $options: 'i' } },
+              { deviceType: { $regex: search, $options: 'i' } },
+              { deviceImei: { $regex: search, $options: 'i' } },
+              { note: { $regex: search, $options: 'i' } },
+              { 'userDetails.name': { $regex: search, $options: 'i' } },
+              {
+                'userDetails.phones.number': { $regex: search, $options: 'i' }
+              },
+              { 'userDetails.address': { $regex: search, $options: 'i' } }
+            ]
+          }
+        },
+        { $count: 'total' }
+      ]);
+
+      totalContracts = totalContracts.length > 0 ? totalContracts[0].total : 0;
+    } else {
+      contracts = await Contract.find().skip(skip).limit(limit);
+      totalContracts = await Contract.countDocuments();
+    }
+
+    const result = {
+      totalContracts,
+      offset: skip,
+      limit,
+      contracts
+    };
+
+    return success(HTTP_STATUS_CODES.OK, result);
   } catch (e) {
     return handleError(e as Error);
   }
