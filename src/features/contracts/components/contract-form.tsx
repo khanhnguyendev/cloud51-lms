@@ -55,16 +55,21 @@ const formSchema = z.object({
 
 export default function ContractForm({
   initialData,
-  pageTitle
+  action
 }: {
   initialData: any;
-  pageTitle: string;
+  action: string;
 }) {
   const router = useRouter();
 
   const [fee, setFee] = useState(0);
   const [installments, setInstallments] = useState<
-    { amount: number; date: string }[]
+    {
+      amount: number;
+      partialAmount: number;
+      paymentDate: string;
+      paidStatus: string;
+    }[]
   >([]);
   const deviceTypes = [
     'iPhone 16',
@@ -146,7 +151,9 @@ export default function ContractForm({
         date.setDate(date.getDate() + 7 * (i + 1));
         return {
           amount: installmentValue,
-          date: date.toLocaleDateString('vi-VN')
+          paymentDate: date.toLocaleDateString('vi-VN'),
+          partialAmount: 0,
+          paidStatus: 'NOT_PAID'
         };
       }
     );
@@ -187,13 +194,14 @@ export default function ContractForm({
     <Card className='mx-auto w-full'>
       <CardHeader>
         <CardTitle className='text-left text-2xl font-bold'>
-          {pageTitle}
+          {action == 'new' ? 'Tạo hợp đồng' : 'Cập nhật hợp đồng'}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className='space-y-2'>
+              {/* Contract Date */}
               <FormField
                 control={form.control}
                 name='contractDate'
@@ -207,6 +215,7 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Customer Name */}
               <FormField
                 control={form.control}
                 name='customerName'
@@ -220,6 +229,7 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Customer Phone */}
               <FormField
                 control={form.control}
                 name='customerPhone'
@@ -233,6 +243,7 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Contract Code */}
               <FormField
                 control={form.control}
                 name='contractCode'
@@ -246,6 +257,7 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Contract Type */}
               <FormField
                 control={form.control}
                 name='contractType'
@@ -255,6 +267,7 @@ export default function ContractForm({
                     <Select
                       onValueChange={(value) => field.onChange(value)}
                       value={field.value}
+                      disabled={action === 'update'}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -270,6 +283,7 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Device Type */}
               <FormField
                 control={form.control}
                 name='deviceType'
@@ -279,6 +293,7 @@ export default function ContractForm({
                     <Select
                       onValueChange={(value) => field.onChange(value)}
                       value={field.value}
+                      disabled={action === 'update'}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -297,6 +312,7 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Device IMEI */}
               <FormField
                 control={form.control}
                 name='deviceImei'
@@ -304,21 +320,27 @@ export default function ContractForm({
                   <FormItem>
                     <FormLabel>IMEI thiết bị</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nhập IMEI thiết bị' {...field} />
+                      <Input
+                        placeholder='Nhập IMEI thiết bị'
+                        {...field}
+                        disabled={action === 'update'}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              {/* Total Amount */}
               <FormField
                 control={form.control}
                 name='totalAmount'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Số tiền tổng</FormLabel>
+                    <FormLabel>Số tiền</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
                       value={field.value?.toString() || ''}
+                      disabled={action === 'update'}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -340,39 +362,12 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Fee */}
               <FormItem>
                 <FormLabel>Phí (10%)</FormLabel>
                 <div>{fee.toLocaleString()} VND</div>
               </FormItem>
-              <FormItem>
-                <FormLabel className='text-gray-800 dark:text-gray-200'>
-                  Các kỳ trả góp
-                </FormLabel>
-                <div
-                  className={`grid gap-4 ${
-                    form.watch('contractType') === 'loan'
-                      ? 'grid-cols-4'
-                      : 'grid-cols-4 grid-rows-2'
-                  }`}
-                >
-                  {installments.map((installment, index) => (
-                    <div
-                      key={index}
-                      className='rounded-md border bg-white p-4 shadow-md transition-shadow duration-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800'
-                    >
-                      <p className='font-bold text-gray-800 dark:text-gray-100'>
-                        Kỳ {index + 1}
-                      </p>
-                      <p className='font-bold text-red-600 dark:text-red-400'>
-                        {installment.amount.toLocaleString()} VND
-                      </p>
-                      <p className='text-gray-600 dark:text-gray-400'>
-                        {installment.date}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </FormItem>
+              {/* Note */}
               <FormField
                 control={form.control}
                 name='note'
@@ -386,10 +381,112 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+
+              <br />
+
+              {/* Installment Info */}
+              <FormItem>
+                <FormLabel className='mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200'>
+                  Các kỳ trả góp
+                </FormLabel>
+                <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2`}>
+                  {installments.map((installment, index) => (
+                    <div
+                      key={index}
+                      className='flex flex-col rounded-lg border bg-gray-50 p-4 shadow-md dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between'
+                    >
+                      {/* Installment Info */}
+                      <div className='space-y-2 sm:flex sm:items-center sm:gap-4 sm:space-y-0'>
+                        <div className='text-center sm:text-left'>
+                          <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            Kỳ {index + 1}
+                          </p>
+                          <p className='text-sm text-gray-500 dark:text-gray-400'>
+                            Ngày: {installment.paymentDate}
+                          </p>
+                          <p className='text-sm font-medium text-red-600 dark:text-red-400'>
+                            {installment.amount.toLocaleString()} VND
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Payment Status and Additional Input */}
+                      <div className='mt-4 space-y-2 sm:mt-0'>
+                        {/* Payment Status Dropdown */}
+                        <FormItem>
+                          <FormLabel className='text-sm text-gray-700 dark:text-gray-300'>
+                            Trạng thái thanh toán
+                          </FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              const updatedInstallments = [...installments];
+                              updatedInstallments[index] = {
+                                ...installment,
+                                paidStatus: value,
+                                partialAmount:
+                                  value === 'PAID_ALL'
+                                    ? installment.amount // Set partialAmount to amount if PAID_ALL
+                                    : value === 'PARTIALLY_PAID'
+                                      ? installment.partialAmount || 0
+                                      : 0
+                              };
+                              setInstallments(updatedInstallments);
+                            }}
+                            value={installment.paidStatus || 'NOT_PAID'}
+                            disabled={action === 'new'}
+                          >
+                            <FormControl>
+                              <SelectTrigger className='w-full sm:w-48'>
+                                <SelectValue placeholder='Chọn trạng thái thanh toán' />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value='NOT_PAID'>
+                                Chưa thanh toán
+                              </SelectItem>
+                              <SelectItem value='PAID_ALL'>
+                                Đã thanh toán
+                              </SelectItem>
+                              <SelectItem value='PARTIALLY_PAID'>
+                                Thanh toán một phần
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+
+                        {/* Paid Amount Input */}
+                        {installment.paidStatus === 'PARTIALLY_PAID' && (
+                          <FormItem>
+                            <FormLabel className='text-sm text-gray-700 dark:text-gray-300'>
+                              Số tiền đã thanh toán
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type='number'
+                                placeholder='Nhập số tiền đã thanh toán'
+                                value={installment.partialAmount || ''}
+                                onChange={(e) => {
+                                  const updatedInstallments = [...installments];
+                                  updatedInstallments[index] = {
+                                    ...installment,
+                                    partialAmount: Number(e.target.value)
+                                  };
+                                  setInstallments(updatedInstallments);
+                                }}
+                                className='w-full sm:w-48'
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </FormItem>
             </div>
             <div className='mt-6'>
-              <Button variant='destructive' className='' type='submit'>
-                Tạo hợp đồng
+              <Button variant='destructive' type='submit'>
+                {action == 'new' ? 'Tạo hợp đồng' : 'Cập nhật hợp đồng'}
               </Button>
             </div>
           </form>

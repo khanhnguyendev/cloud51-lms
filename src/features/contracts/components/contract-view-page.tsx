@@ -11,7 +11,7 @@ export default async function ContractViewPage({
   contractId
 }: TContractViewPageProps) {
   let contract: IContract | null = null;
-  let pageTitle = 'Tạo mới hợp đồng';
+  let action = 'new';
 
   if (contractId && contractId !== 'new') {
     try {
@@ -22,12 +22,12 @@ export default async function ContractViewPage({
         notFound();
       }
 
-      pageTitle = `Chỉnh sửa hợp đồng`;
+      action = `update`;
     } catch (error) {
       console.error('Failed to fetch contract:', error);
       notFound();
     }
   }
 
-  return <ContractForm initialData={contract} pageTitle={pageTitle} />;
+  return <ContractForm initialData={contract} action={action} />;
 }
