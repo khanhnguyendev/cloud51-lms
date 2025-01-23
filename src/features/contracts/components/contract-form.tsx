@@ -61,11 +61,13 @@ export default function ContractForm({
   pageTitle: string;
 }) {
   const router = useRouter();
-
-  const [fee, setFee] = useState(0);
   const [installments, setInstallments] = useState<
     { amount: number; date: string }[]
   >([]);
+  const [transactions, setTransactions] = useState(
+    initialData?.transactions || []
+  );
+
   const deviceTypes = [
     'iPhone 16',
     'iPhone 16 Plus',
@@ -111,11 +113,20 @@ export default function ContractForm({
     values: defaultValues
   });
 
+  const calculateFee = (totalAmount: number) => {
+    return Math.max(200000, totalAmount * 0.1);
+  };
+
+  const [fee, setFee] = useState(calculateFee(form.getValues('totalAmount')));
+
   useEffect(() => {
-    const totalAmount = form.watch('totalAmount');
-    const contractType = form.watch('contractType');
-    const contractDate = form.watch('contractDate');
-    calculateFeeAndInstallments(totalAmount, contractType, contractDate);
+    if (!initialData?.transactions) {
+      const totalAmount = form.watch('totalAmount');
+      const contractType = form.watch('contractType');
+      const contractDate = form.watch('contractDate');
+      calculateFee(totalAmount);
+      calculateFeeAndInstallments(totalAmount, contractType, contractDate);
+    }
   }, [
     form.watch('totalAmount'),
     form.watch('contractType'),
@@ -131,9 +142,6 @@ export default function ContractForm({
       setInstallments([]);
       return;
     }
-
-    const calculatedFee = Math.max(totalAmount * 0.1, 200000);
-    setFee(calculatedFee);
 
     const installmentCount = contractType === 'loan' ? 4 : 8;
     const installmentValue =
@@ -345,30 +353,22 @@ export default function ContractForm({
                 <div>{fee.toLocaleString()} VND</div>
               </FormItem>
               <FormItem>
-                <FormLabel className='text-gray-800 dark:text-gray-200'>
-                  Các kỳ trả góp
-                </FormLabel>
-                <div
-                  className={`grid gap-4 ${
-                    form.watch('contractType') === 'loan'
-                      ? 'grid-cols-4'
-                      : 'grid-cols-4 grid-rows-2'
-                  }`}
-                >
-                  {installments.map((installment, index) => (
+                <FormLabel>Các kỳ trả góp</FormLabel>
+                <div className='grid grid-cols-4 gap-4'>
+                  {transactions.map((transaction: any, index: number) => (
                     <div
-                      key={index}
-                      className='rounded-md border bg-white p-4 shadow-md transition-shadow duration-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800'
+                      key={transaction._id || index}
+                      className='rounded-md border p-4'
                     >
-                      <p className='font-bold text-gray-800 dark:text-gray-100'>
-                        Kỳ {index + 1}
+                      <p>Kỳ {index + 1}</p>
+                      <p>Số tiền: {transaction.amount.toLocaleString()} VND</p>
+                      <p>
+                        Ngày thanh toán:{' '}
+                        {new Date(transaction.paymentDate).toLocaleDateString(
+                          'vi-VN'
+                        )}
                       </p>
-                      <p className='font-bold text-red-600 dark:text-red-400'>
-                        {installment.amount.toLocaleString()} VND
-                      </p>
-                      <p className='text-gray-600 dark:text-gray-400'>
-                        {installment.date}
-                      </p>
+                      <p>Trạng thái: {transaction.paidStatus}</p>
                     </div>
                   ))}
                 </div>
