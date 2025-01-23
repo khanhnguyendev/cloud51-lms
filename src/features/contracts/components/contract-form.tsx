@@ -23,7 +23,6 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { CONTRACTS_API } from '@/constants/route-api';
 import { useRouter } from 'next/navigation';
 import { IContract } from '@/models/contract';
 
@@ -65,12 +64,14 @@ export default function ContractForm({
   const [fee, setFee] = useState(0);
   const [installments, setInstallments] = useState<
     {
+      _id: string;
       amount: number;
       partialAmount: number;
       paymentDate: string;
       paidStatus: string;
     }[]
   >([]);
+
   const deviceTypes = [
     'iPhone 16',
     'iPhone 16 Plus',
@@ -116,11 +117,32 @@ export default function ContractForm({
     values: defaultValues
   });
 
+  const calculatedFee = (totalAmount: number) => {
+    setFee(Math.max(totalAmount * 0.1, 200000));
+  };
+
   useEffect(() => {
     const totalAmount = form.watch('totalAmount');
     const contractType = form.watch('contractType');
     const contractDate = form.watch('contractDate');
-    calculateFeeAndInstallments(totalAmount, contractType, contractDate);
+
+    if (action === 'update' && initialData?.transactions) {
+      const updatedInstallments = initialData.transactions.map(
+        (transaction: any) => ({
+          _id: transaction._id,
+          amount: transaction.amount,
+          partialAmount: transaction.partialAmount || 0,
+          paymentDate: new Date(transaction.paymentDate)
+            .toISOString()
+            .split('T')[0],
+          paidStatus: transaction.paidStatus || 'NOT_PAID'
+        })
+      );
+      setInstallments(updatedInstallments);
+      calculatedFee(totalAmount);
+    } else {
+      calculateFeeAndInstallments(totalAmount, contractType, contractDate);
+    }
   }, [
     form.watch('totalAmount'),
     form.watch('contractType'),
@@ -137,8 +159,7 @@ export default function ContractForm({
       return;
     }
 
-    const calculatedFee = Math.max(totalAmount * 0.1, 200000);
-    setFee(calculatedFee);
+    calculatedFee(totalAmount);
 
     const installmentCount = contractType === 'loan' ? 4 : 8;
     const installmentValue =
@@ -150,6 +171,7 @@ export default function ContractForm({
         const date = new Date(contractDate);
         date.setDate(date.getDate() + 7 * (i + 1));
         return {
+          _id: '',
           amount: installmentValue,
           paymentDate: date.toLocaleDateString('vi-VN'),
           partialAmount: 0,
@@ -162,32 +184,59 @@ export default function ContractForm({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const dataToSubmit = { ...values };
+    if (action === 'new') {
+      const dataToSubmit = { ...values };
 
-    const createContract = async () => {
-      const response = await fetch(CONTRACTS_API.CREATE_CONTRACT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSubmit)
+      const createContract = async () => {
+        const response = await fetch('/api/v1/contracts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dataToSubmit)
+        });
+
+        if (!response.ok) {
+          const errorRes = await response.json();
+          throw new Error(errorRes?.error || 'Unknown error occurred');
+        }
+
+        const result = await response.json();
+        return result.message;
+      };
+
+      toast.promise(createContract(), {
+        loading: 'Đang tạo hợp đồng...',
+        success: (contract: IContract) => {
+          router.push(`/dashboard/contract/${contract._id}`);
+          return 'Hợp đồng được tạo thành công!';
+        },
+        error: (error: Error) => error.message || 'Tạo hợp đồng thất bại!'
       });
+    }
 
-      if (!response.ok) {
-        const errorRes = await response.json();
-        throw new Error(errorRes?.error || 'Unknown error occurred');
-      }
+    if (action === 'update') {
+      const updateInstallments = async () => {
+        const response = await fetch('/api/v1/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(installments)
+        });
 
-      const result = await response.json();
-      return result.message;
-    };
+        if (!response.ok) {
+          const errorRes = await response.json();
+          throw new Error(errorRes?.error || 'Unknown error occurred');
+        }
 
-    toast.promise(createContract(), {
-      loading: 'Đang tạo hợp đồng...',
-      success: (contract: IContract) => {
-        router.push(`/dashboard/contract/${contract._id}`);
-        return 'Hợp đồng được tạo thành công!';
-      },
-      error: (error: Error) => error.message || 'Tạo hợp đồng thất bại!'
-    });
+        const result = await response.json();
+        return result.message;
+      };
+
+      toast.promise(updateInstallments(), {
+        loading: 'Đang cập nhật các kỳ trả góp...',
+        success: 'Cập nhật kỳ trả góp thành công!',
+        error: (error: Error) =>
+          error.message || 'Cập nhật kỳ trả góp thất bại!'
+      });
+    }
   };
 
   return (
@@ -209,7 +258,11 @@ export default function ContractForm({
                   <FormItem>
                     <FormLabel>Ngày tạo hợp đồng</FormLabel>
                     <FormControl>
-                      <Input type='date' {...field} />
+                      <Input
+                        type='date'
+                        {...field}
+                        disabled={action === 'update'}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -223,7 +276,11 @@ export default function ContractForm({
                   <FormItem>
                     <FormLabel>Tên KH</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nhập tên KH' {...field} />
+                      <Input
+                        placeholder='Nhập tên KH'
+                        {...field}
+                        disabled={action === 'update'}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -237,7 +294,11 @@ export default function ContractForm({
                   <FormItem>
                     <FormLabel>Số điện thoại</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nhập số điện thoại' {...field} />
+                      <Input
+                        placeholder='Nhập số điện thoại'
+                        {...field}
+                        disabled={action === 'update'}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -251,7 +312,11 @@ export default function ContractForm({
                   <FormItem>
                     <FormLabel>Mã hợp đồng</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nhập mã hợp đồng' {...field} />
+                      <Input
+                        placeholder='Nhập mã hợp đồng'
+                        {...field}
+                        disabled={action === 'update'}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -368,7 +433,7 @@ export default function ContractForm({
                 <div>{fee.toLocaleString()} VND</div>
               </FormItem>
               {/* Note */}
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name='note'
                 render={({ field }) => (
@@ -380,7 +445,7 @@ export default function ContractForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
 
               <br />
 
@@ -457,13 +522,10 @@ export default function ContractForm({
                         {/* Paid Amount Input */}
                         {installment.paidStatus === 'PARTIALLY_PAID' && (
                           <FormItem>
-                            <FormLabel className='text-sm text-gray-700 dark:text-gray-300'>
-                              Số tiền đã thanh toán
-                            </FormLabel>
                             <FormControl>
                               <Input
                                 type='number'
-                                placeholder='Nhập số tiền đã thanh toán'
+                                placeholder='Nhập số tiền'
                                 value={installment.partialAmount || ''}
                                 onChange={(e) => {
                                   const updatedInstallments = [...installments];

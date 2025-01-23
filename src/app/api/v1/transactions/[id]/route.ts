@@ -26,7 +26,7 @@ export async function GET(
     }
 
     return success(HTTP_STATUS_CODES.OK, transaction);
-  } catch (e) {
-    return handleError(e);
+  } catch (error) {
+    return handleError(error);
   }
 }
