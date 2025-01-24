@@ -447,104 +447,112 @@ export default function ContractForm({
                 )}
               /> */}
 
-              <br />
-
-              {/* Installment Info */}
-              <FormItem>
-                <FormLabel className='mb-4 text-lg font-semibold text-gray-800 dark:text-gray-200'>
-                  Các kỳ trả góp
-                </FormLabel>
-                <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2`}>
-                  {installments.map((installment, index) => (
+              <Card className='mx-auto w-full'>
+                <CardHeader>
+                  <CardTitle className='text-left text-2xl font-bold'>
+                    Các kỳ trả góp
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Installment Info */}
+                  <FormItem>
                     <div
-                      key={index}
-                      className='flex flex-col rounded-lg border bg-gray-50 p-4 shadow-md dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between'
+                      className={`xs:grid-cols-2 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4`}
                     >
-                      {/* Installment Info */}
-                      <div className='space-y-2 sm:flex sm:items-center sm:gap-4 sm:space-y-0'>
-                        <div className='text-center sm:text-left'>
-                          <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-                            Kỳ {index + 1}
-                          </p>
-                          <p className='text-sm text-gray-500 dark:text-gray-400'>
-                            Ngày: {installment.paymentDate}
-                          </p>
-                          <p className='text-sm font-medium text-red-600 dark:text-red-400'>
-                            {installment.amount.toLocaleString()} VND
-                          </p>
-                        </div>
-                      </div>
+                      {installments.map((installment, index) => (
+                        <div
+                          key={index}
+                          className='flex flex-col rounded-lg border p-4 shadow-md dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between'
+                        >
+                          {/* Installment Info */}
+                          <div className='space-y-2 sm:flex sm:items-center sm:gap-4 sm:space-y-0'>
+                            <div className='text-center sm:text-left'>
+                              <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                                Kỳ {index + 1}
+                              </p>
+                              <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                Ngày: {installment.paymentDate}
+                              </p>
+                              <p className='text-sm font-medium text-red-600 dark:text-red-400'>
+                                {installment.amount.toLocaleString()} VND
+                              </p>
+                            </div>
+                          </div>
 
-                      {/* Payment Status and Additional Input */}
-                      <div className='mt-4 space-y-2 sm:mt-0'>
-                        {/* Payment Status Dropdown */}
-                        <FormItem>
-                          <FormLabel className='text-sm text-gray-700 dark:text-gray-300'>
-                            Trạng thái thanh toán
-                          </FormLabel>
-                          <Select
-                            onValueChange={(value) => {
-                              const updatedInstallments = [...installments];
-                              updatedInstallments[index] = {
-                                ...installment,
-                                paidStatus: value,
-                                partialAmount:
-                                  value === 'PAID_ALL'
-                                    ? installment.amount // Set partialAmount to amount if PAID_ALL
-                                    : value === 'PARTIALLY_PAID'
-                                      ? installment.partialAmount || 0
-                                      : 0
-                              };
-                              setInstallments(updatedInstallments);
-                            }}
-                            value={installment.paidStatus || 'NOT_PAID'}
-                            disabled={action === 'new'}
-                          >
-                            <FormControl>
-                              <SelectTrigger className='w-full sm:w-48'>
-                                <SelectValue placeholder='Chọn trạng thái thanh toán' />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value='NOT_PAID'>
-                                Chưa thanh toán
-                              </SelectItem>
-                              <SelectItem value='PAID_ALL'>
-                                Đã thanh toán
-                              </SelectItem>
-                              <SelectItem value='PARTIALLY_PAID'>
-                                Thanh toán một phần
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-
-                        {/* Paid Amount Input */}
-                        {installment.paidStatus === 'PARTIALLY_PAID' && (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                type='number'
-                                placeholder='Nhập số tiền'
-                                value={installment.partialAmount || ''}
-                                onChange={(e) => {
+                          {/* Payment Status and Additional Input */}
+                          <div className='mt-4 space-y-2 text-center'>
+                            {/* Payment Status Dropdown */}
+                            <FormItem>
+                              <FormLabel className='text-sm text-gray-700 dark:text-gray-300'>
+                                Trạng thái
+                              </FormLabel>
+                              <Select
+                                onValueChange={(value) => {
                                   const updatedInstallments = [...installments];
                                   updatedInstallments[index] = {
                                     ...installment,
-                                    partialAmount: Number(e.target.value)
+                                    paidStatus: value,
+                                    partialAmount:
+                                      value === 'PAID_ALL'
+                                        ? installment.amount // Set partialAmount to amount if PAID_ALL
+                                        : value === 'PARTIALLY_PAID'
+                                          ? installment.partialAmount || 0
+                                          : 0
                                   };
                                   setInstallments(updatedInstallments);
                                 }}
-                                className='w-full sm:w-48'
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      </div>
+                                value={installment.paidStatus || 'NOT_PAID'}
+                                disabled={action === 'new'}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className='mx-auto w-fit'>
+                                    <SelectValue placeholder='Chọn trạng thái thanh toán' />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value='NOT_PAID'>
+                                    Chưa thanh toán
+                                  </SelectItem>
+                                  <SelectItem value='PAID_ALL'>
+                                    Đã thanh toán
+                                  </SelectItem>
+                                  <SelectItem value='PARTIALLY_PAID'>
+                                    Thanh toán một phần
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+
+                            {/* Paid Amount Input */}
+                            {installment.paidStatus === 'PARTIALLY_PAID' && (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    type='number'
+                                    placeholder='Nhập số tiền'
+                                    value={installment.partialAmount || ''}
+                                    onChange={(e) => {
+                                      const updatedInstallments = [
+                                        ...installments
+                                      ];
+                                      updatedInstallments[index] = {
+                                        ...installment,
+                                        partialAmount: Number(e.target.value)
+                                      };
+                                      setInstallments(updatedInstallments);
+                                    }}
+                                    className='w-full sm:w-48'
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </FormItem>
+                  </FormItem>
+                </CardContent>
+              </Card>
             </div>
             <div className='mt-6'>
               <Button variant='destructive' type='submit'>

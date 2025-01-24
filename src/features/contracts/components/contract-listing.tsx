@@ -21,8 +21,6 @@ export default async function ContractListingPage({}: ContractListingPage) {
   const totalContracts = data.total_contracts;
   const contracts = data.contracts;
 
-  console.log(`data::`, data);
-
   return (
     <ContractTable
       columns={columns}
