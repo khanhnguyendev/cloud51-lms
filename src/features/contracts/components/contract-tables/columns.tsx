@@ -7,7 +7,7 @@ import { IContract } from '@/models/contract';
 export const columns: ColumnDef<IContract>[] = [
   {
     accessorKey: 'contractDate',
-    header: 'CONTRACT DATE',
+    header: 'Ngày tạo HĐ',
     cell: ({ getValue }) => {
       const value = getValue<string>();
       const date = new Date(value);
@@ -19,19 +19,34 @@ export const columns: ColumnDef<IContract>[] = [
   },
   {
     accessorKey: 'contractCode',
-    header: 'CONTRACT CODE'
+    header: 'Mã HĐ'
   },
   {
+    accessorKey: 'user.name',
+    header: 'Tên KH',
+    cell: ({ getValue }) => getValue<string>() || 'N/A'
+  },
+  {
+    accessorKey: 'user.phones',
+    header: 'SĐT',
+    cell: ({ getValue }) => {
+      const phones = getValue<{ number: string }[]>();
+      return phones && phones[0]?.number ? phones[0].number : 'N/A';
+    }
+  },
+  {
+    // loan: Vay
+    // lease: Góp
     accessorKey: 'contractType',
-    header: 'CONTRACT TYPE'
-  },
-  {
-    accessorKey: 'deviceType',
-    header: 'DEVICE TYPE'
+    header: 'Loại HĐ',
+    cell: ({ getValue }) => {
+      const value = getValue<string>();
+      return value === 'loan' ? 'Vay' : 'Góp';
+    }
   },
   {
     accessorKey: 'totalAmount',
-    header: 'TOTAL AMOUNT',
+    header: 'Tổng tiền',
     cell: ({ getValue }) => {
       const value = getValue<number>();
       return value.toLocaleString('vi-VN', {
@@ -40,21 +55,21 @@ export const columns: ColumnDef<IContract>[] = [
       });
     }
   },
-  {
-    accessorKey: 'fee',
-    header: 'FEE',
-    cell: ({ getValue }) => {
-      const value = getValue<number>();
-      return value.toLocaleString('vi-VN', {
-        style: 'currency',
-        currency: 'VND'
-      });
-    }
-  },
-  {
-    accessorKey: 'note',
-    header: 'NOTE'
-  },
+  // {
+  //   accessorKey: 'fee',
+  //   header: 'FEE',
+  //   cell: ({ getValue }) => {
+  //     const value = getValue<number>();
+  //     return value.toLocaleString('vi-VN', {
+  //       style: 'currency',
+  //       currency: 'VND'
+  //     });
+  //   }
+  // },
+  // {
+  //   accessorKey: 'note',
+  //   header: 'Ghi chú'
+  // },
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />

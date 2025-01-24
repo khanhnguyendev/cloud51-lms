@@ -268,6 +268,24 @@ export default function ContractForm({
                   </FormItem>
                 )}
               />
+              {/* Contract Code */}
+              <FormField
+                control={form.control}
+                name='contractCode'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mã hợp đồng</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Nhập mã hợp đồng'
+                        {...field}
+                        disabled={action === 'update'}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {/* Customer Name */}
               <FormField
                 control={form.control}
@@ -296,24 +314,6 @@ export default function ContractForm({
                     <FormControl>
                       <Input
                         placeholder='Nhập số điện thoại'
-                        {...field}
-                        disabled={action === 'update'}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Contract Code */}
-              <FormField
-                control={form.control}
-                name='contractCode'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mã hợp đồng</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder='Nhập mã hợp đồng'
                         {...field}
                         disabled={action === 'update'}
                       />
@@ -428,10 +428,10 @@ export default function ContractForm({
                 )}
               />
               {/* Fee */}
-              <FormItem>
+              {/* <FormItem>
                 <FormLabel>Phí (10%)</FormLabel>
                 <div>{fee.toLocaleString()} VND</div>
-              </FormItem>
+              </FormItem> */}
               {/* Note */}
               {/* <FormField
                 control={form.control}

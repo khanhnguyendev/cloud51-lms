@@ -51,7 +51,13 @@ export async function GET(req: NextRequest) {
             from: 'users', // Reference to the User collection
             localField: 'user', // Field in Contract that references User
             foreignField: '_id', // _id field in User collection
-            as: 'userDetails' // Alias for user data
+            as: 'user' // Alias for user data
+          }
+        },
+        {
+          $unwind: {
+            path: '$user', // Deconstruct the user array
+            preserveNullAndEmptyArrays: true // Keep documents even if user is null
           }
         },
         {
@@ -61,11 +67,9 @@ export async function GET(req: NextRequest) {
               { deviceType: { $regex: search, $options: 'i' } }, // Search in deviceType
               { deviceImei: { $regex: search, $options: 'i' } }, // Search in deviceImei
               { note: { $regex: search, $options: 'i' } }, // Search in note
-              { 'userDetails.name': { $regex: search, $options: 'i' } }, // Search in user's name
-              {
-                'userDetails.phones.number': { $regex: search, $options: 'i' }
-              }, // Search in user's phone number
-              { 'userDetails.address': { $regex: search, $options: 'i' } } // Search in user's address
+              { 'user.name': { $regex: search, $options: 'i' } }, // Search in user's name
+              { 'user.phones.number': { $regex: search, $options: 'i' } }, // Search in user's phone number
+              { 'user.address': { $regex: search, $options: 'i' } } // Search in user's address
             ]
           }
         },
@@ -79,7 +83,13 @@ export async function GET(req: NextRequest) {
             from: 'users',
             localField: 'user',
             foreignField: '_id',
-            as: 'userDetails'
+            as: 'user'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user', // Deconstruct the user array
+            preserveNullAndEmptyArrays: true
           }
         },
         {
@@ -89,11 +99,9 @@ export async function GET(req: NextRequest) {
               { deviceType: { $regex: search, $options: 'i' } },
               { deviceImei: { $regex: search, $options: 'i' } },
               { note: { $regex: search, $options: 'i' } },
-              { 'userDetails.name': { $regex: search, $options: 'i' } },
-              {
-                'userDetails.phones.number': { $regex: search, $options: 'i' }
-              },
-              { 'userDetails.address': { $regex: search, $options: 'i' } }
+              { 'user.name': { $regex: search, $options: 'i' } },
+              { 'user.phones.number': { $regex: search, $options: 'i' } },
+              { 'user.address': { $regex: search, $options: 'i' } }
             ]
           }
         },
@@ -102,7 +110,24 @@ export async function GET(req: NextRequest) {
 
       totalContracts = totalContracts.length > 0 ? totalContracts[0].total : 0;
     } else {
-      contracts = await Contract.find().skip(skip).limit(limit);
+      contracts = await Contract.aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user', // Deconstruct the user array
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
       totalContracts = await Contract.countDocuments();
     }
 
@@ -118,7 +143,6 @@ export async function GET(req: NextRequest) {
     return handleError(e as Error);
   }
 }
-
 export async function POST(req: Request) {
   const request: createContractReq = await req.json();
   console.log('Create contract request::', request);
