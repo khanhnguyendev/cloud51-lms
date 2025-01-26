@@ -13,6 +13,9 @@ export interface IUser extends Document {
     }
   ];
   address: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
 }
 
 const UserSchema: Schema = new mongoose.Schema(
@@ -54,6 +57,10 @@ const UserSchema: Schema = new mongoose.Schema(
     ],
     address: {
       type: String
+    },
+    deletedAt: {
+      type: Date,
+      default: null
     }
   },
   { timestamps: true }

@@ -14,6 +14,7 @@ export interface IContract extends Document {
   user: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
 }
 
 const ContractSchema: Schema = new mongoose.Schema(
@@ -62,6 +63,10 @@ const ContractSchema: Schema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
+    },
+    deletedAt: {
+      type: Date,
+      default: null
     }
   },
   { timestamps: true }

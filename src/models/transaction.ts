@@ -9,6 +9,9 @@ export interface ITransaction extends Document {
   paidStatus: string;
   status: string;
   note: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
 }
 
 const TransactionSchema: Schema = new mongoose.Schema({
@@ -53,6 +56,10 @@ const TransactionSchema: Schema = new mongoose.Schema({
   },
   note: {
     type: String
+  },
+  deletedAt: {
+    type: Date,
+    default: null
   }
 });
 

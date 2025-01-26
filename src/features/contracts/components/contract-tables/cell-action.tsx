@@ -1,4 +1,6 @@
 'use client';
+
+import { toast } from 'sonner';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +25,36 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const router = useRouter();
 
   const onConfirm = async () => {
-    alert(data._id);
+    setLoading(true);
+    const deleteContract = async () => {
+      const res = await fetch(`/api/v1/contracts/${data._id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) {
+        const errorRes = await res.json();
+        throw new Error(errorRes?.error || 'Unknown error occurred');
+      }
+
+      const result = await res.json();
+      return result.message;
+    };
+
+    try {
+      await toast.promise(deleteContract(), {
+        loading: 'Đang xoá hợp đồng...',
+        success: 'Xoá hợp đồng thành công!',
+        error: (error: Error) => error.message || 'Xoá hợp đồng thất bại!'
+      });
+
+      setOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

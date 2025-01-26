@@ -44,39 +44,48 @@ export async function GET(req: NextRequest) {
     let contracts;
     let totalContracts;
 
-    if (search) {
-      contracts = await Contract.aggregate([
-        {
-          $lookup: {
-            from: 'users', // Reference to the User collection
-            localField: 'user', // Field in Contract that references User
-            foreignField: '_id', // _id field in User collection
-            as: 'user' // Alias for user data
-          }
-        },
-        {
-          $unwind: {
-            path: '$user', // Deconstruct the user array
-            preserveNullAndEmptyArrays: true // Keep documents even if user is null
-          }
-        },
-        {
-          $match: {
-            $or: [
-              { contractCode: { $regex: search, $options: 'i' } }, // Search in contractCode
-              { deviceType: { $regex: search, $options: 'i' } }, // Search in deviceType
-              { deviceImei: { $regex: search, $options: 'i' } }, // Search in deviceImei
-              { note: { $regex: search, $options: 'i' } }, // Search in note
-              { 'user.name': { $regex: search, $options: 'i' } }, // Search in user's name
-              { 'user.phones.number': { $regex: search, $options: 'i' } }, // Search in user's phone number
-              { 'user.address': { $regex: search, $options: 'i' } } // Search in user's address
-            ]
-          }
-        },
-        { $skip: skip },
-        { $limit: limit }
-      ]);
+    const matchCondition: Record<string, any> = {
+      deletedAt: null
+    };
 
+    if (search) {
+      // Add search conditions
+      matchCondition.$or = [
+        { contractCode: { $regex: search, $options: 'i' } }, // Search in contractCode
+        { deviceType: { $regex: search, $options: 'i' } }, // Search in deviceType
+        { deviceImei: { $regex: search, $options: 'i' } }, // Search in deviceImei
+        { note: { $regex: search, $options: 'i' } }, // Search in note
+        { 'user.name': { $regex: search, $options: 'i' } }, // Search in user's name
+        { 'user.phones.number': { $regex: search, $options: 'i' } }, // Search in user's phone number
+        { 'user.address': { $regex: search, $options: 'i' } } // Search in user's address
+      ];
+    }
+
+    // Fetch contracts with the match condition
+    contracts = await Contract.aggregate([
+      {
+        $lookup: {
+          from: 'users', // Reference to the User collection
+          localField: 'user', // Field in Contract that references User
+          foreignField: '_id', // _id field in User collection
+          as: 'user' // Alias for user data
+        }
+      },
+      {
+        $unwind: {
+          path: '$user', // Deconstruct the user array
+          preserveNullAndEmptyArrays: true // Keep documents even if user is null
+        }
+      },
+      {
+        $match: matchCondition // Apply the match condition here
+      },
+      { $skip: skip },
+      { $limit: limit }
+    ]);
+
+    // Fetch total contracts count
+    if (search) {
       totalContracts = await Contract.aggregate([
         {
           $lookup: {
@@ -93,42 +102,14 @@ export async function GET(req: NextRequest) {
           }
         },
         {
-          $match: {
-            $or: [
-              { contractCode: { $regex: search, $options: 'i' } },
-              { deviceType: { $regex: search, $options: 'i' } },
-              { deviceImei: { $regex: search, $options: 'i' } },
-              { note: { $regex: search, $options: 'i' } },
-              { 'user.name': { $regex: search, $options: 'i' } },
-              { 'user.phones.number': { $regex: search, $options: 'i' } },
-              { 'user.address': { $regex: search, $options: 'i' } }
-            ]
-          }
+          $match: matchCondition // Apply the same match condition
         },
         { $count: 'total' }
       ]);
 
       totalContracts = totalContracts.length > 0 ? totalContracts[0].total : 0;
     } else {
-      contracts = await Contract.aggregate([
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'user',
-            foreignField: '_id',
-            as: 'user'
-          }
-        },
-        {
-          $unwind: {
-            path: '$user', // Deconstruct the user array
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        { $skip: skip },
-        { $limit: limit }
-      ]);
-      totalContracts = await Contract.countDocuments();
+      totalContracts = await Contract.countDocuments({ deletedAt: null }); // Count only non-deleted contracts
     }
 
     const result = {
@@ -143,6 +124,7 @@ export async function GET(req: NextRequest) {
     return handleError(e as Error);
   }
 }
+
 export async function POST(req: Request) {
   const request: createContractReq = await req.json();
   console.log('Create contract request::', request);
