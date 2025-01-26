@@ -25,6 +25,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { IContract } from '@/models/contract';
+import { ITransaction } from '@/models/transaction';
 
 const formSchema = z.object({
   contractDate: z
@@ -232,7 +233,10 @@ export default function ContractForm({
 
       toast.promise(updateInstallments(), {
         loading: 'Đang cập nhật các kỳ trả góp...',
-        success: 'Cập nhật kỳ trả góp thành công!',
+        success: (transactions: ITransaction[]) => {
+          router.refresh();
+          return 'Cập nhật kỳ trả góp thành công!';
+        },
         error: (error: Error) =>
           error.message || 'Cập nhật kỳ trả góp thất bại!'
       });
