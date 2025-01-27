@@ -18,7 +18,7 @@ export default async function ContractListingPage({}: ContractListingPage) {
   };
 
   const data = await fetchContracts(filters);
-  const totalContracts = data.total_contracts;
+  const totalContracts = data.totalContracts;
   const contracts = data.contracts;
 
   return (
