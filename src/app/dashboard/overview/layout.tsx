@@ -2,6 +2,7 @@
 
 import PageContainer from '@/components/layout/page-container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import React, { useEffect, useState } from 'react';
 
 export default function OverViewLayout({
@@ -15,24 +16,15 @@ export default function OverViewLayout({
   bar_stats: React.ReactNode;
   area_stats: React.ReactNode;
 }) {
-  const [totalLoans, setTotalLoans] = useState({
-    all: 0,
-    current: 0,
-    previous: 0,
-    change: 0
-  });
-  const [currentlyLoaned, setCurrentlyLoaned] = useState({ current: 0 });
-  const [totalCollected, setTotalCollected] = useState({
-    all: 0,
-    current: 0,
-    previous: 0,
-    change: 0
-  });
+  const [loading, setLoading] = useState(true);
+  const [totalLoans, setTotalLoans] = useState(0);
+  const [currentlyLoaned, setCurrentlyLoaned] = useState(0);
+  const [totalCollected, setTotalCollected] = useState(0);
   const [totalContracts, setTotalContracts] = useState({
-    current: 0,
-    previous: 0,
-    change: 0
+    in_process: 0,
+    completed: 0
   });
+  const [totalFee, setTotalFee] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
@@ -41,28 +33,17 @@ export default function OverViewLayout({
         const json = await response.json();
         const data = json.message;
 
-        setTotalLoans({
-          all: data.totalLoans.all || 0,
-          previous: data.totalLoans.previous || 0,
-          current: data.totalLoans.current || 0,
-          change: data.totalLoans.change || 0
-        });
-        setCurrentlyLoaned({
-          current: data.currentlyLoaned.current || 0
-        });
-        setTotalCollected({
-          all: data.totalCollected.all || 0,
-          current: data.totalCollected.current || 0,
-          previous: data.totalCollected.previous || 0,
-          change: data.totalCollected.change || 0
-        });
-        setTotalContracts({
-          current: data.totalContracts.current || 0,
-          previous: data.totalContracts.previous || 0,
-          change: data.totalContracts.change || 0
-        });
+        setTotalLoans(data.totalLoans || 0);
+        setCurrentlyLoaned(data.currentlyLoaned || 0);
+        setTotalCollected(data.totalCollected || 0);
+        setTotalContracts(
+          data.totalContracts || { in_process: 0, completed: 0 }
+        );
+        setTotalFee(data.totalFee || 0);
       } catch (error) {
         console.error('Failed to fetch aggregate data:', error);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -75,7 +56,7 @@ export default function OverViewLayout({
         <div className='flex items-center justify-between space-y-2'>
           <h2 className='text-2xl font-bold tracking-tight'>Hi, Cloud Shop</h2>
         </div>
-        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
           {/* Card for Total Loans */}
           <Card>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
@@ -96,21 +77,16 @@ export default function OverViewLayout({
               </svg>
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold'>
-                {totalLoans.all.toLocaleString('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND'
-                })}
-              </div>
-              <p className='text-xs text-muted-foreground'>
-                {totalLoans.change >= 0 ? '+' : ''}
-                {totalLoans.change.toFixed(1)}% so với tháng trước (
-                {totalLoans.previous.toLocaleString('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND'
-                })}
-                )
-              </p>
+              {loading ? (
+                <Skeleton />
+              ) : (
+                <div className='text-2xl font-bold'>
+                  {totalLoans.toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -134,12 +110,16 @@ export default function OverViewLayout({
               </svg>
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold'>
-                {currentlyLoaned.current.toLocaleString('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND'
-                })}
-              </div>
+              {loading ? (
+                <Skeleton />
+              ) : (
+                <div className='text-2xl font-bold'>
+                  {currentlyLoaned.toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -162,28 +142,54 @@ export default function OverViewLayout({
               </svg>
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold'>
-                {totalCollected.all.toLocaleString('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND'
-                })}
-              </div>
-              <p className='text-xs text-muted-foreground'>
-                {totalCollected.change >= 0 ? '+' : ''}
-                {totalCollected.change.toFixed(1)}% so với tháng trước (
-                {totalCollected.previous.toLocaleString('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND'
-                })}
-                )
-              </p>
+              {loading ? (
+                <Skeleton />
+              ) : (
+                <div className='text-2xl font-bold'>
+                  {totalCollected.toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Card for Total Fee */}
+          <Card>
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+              <CardTitle className='text-sm font-medium'>Tổng phí HĐ</CardTitle>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth='2'
+                className='h-4 w-4 text-muted-foreground'
+              >
+                <path d='M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton />
+              ) : (
+                <div className='text-2xl font-bold'>
+                  {totalFee.toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* Card for Total Contracts */}
           <Card>
             <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>Số lượng KH</CardTitle>
+              <CardTitle className='text-sm font-medium'>Số lượng HĐ</CardTitle>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 viewBox='0 0 24 24'
@@ -199,18 +205,34 @@ export default function OverViewLayout({
                 <path d='M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75' />
               </svg>
             </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>
-                {totalContracts.current.toLocaleString()}
-              </div>
-              <p className='text-xs text-muted-foreground'>
-                {totalContracts.change >= 0 ? '+' : ''}
-                {totalContracts.change.toFixed(1)}% so với tháng trước (
-                {totalContracts.previous.toLocaleString()})
-              </p>
+            <CardContent className='flex flex-col space-y-1'>
+              {loading ? (
+                <Skeleton />
+              ) : (
+                <>
+                  <div className='flex items-center justify-between'>
+                    <div className='text-xs text-muted-foreground'>
+                      Đang thu
+                    </div>
+                    <div className='text-xl font-bold text-yellow-500'>
+                      {totalContracts.in_process}
+                    </div>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <div className='text-xs text-muted-foreground'>
+                      Đã hoàn thành
+                    </div>
+                    <div className='text-xl font-bold text-green-500'>
+                      {totalContracts.completed}
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
-        </div>{' '}
+        </div>
+
+        {/* Future Placeholder */}
         {/* <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7'>
           <div className='col-span-4 md:col-span-3'>{sales}</div>
         </div> */}
