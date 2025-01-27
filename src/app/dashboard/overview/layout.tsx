@@ -78,7 +78,7 @@ export default function OverViewLayout({
             </CardHeader>
             <CardContent>
               {loading ? (
-                <Skeleton />
+                <Skeleton className='h-10 w-full' />
               ) : (
                 <div className='text-2xl font-bold'>
                   {totalLoans.toLocaleString('vi-VN', {
@@ -111,7 +111,7 @@ export default function OverViewLayout({
             </CardHeader>
             <CardContent>
               {loading ? (
-                <Skeleton />
+                <Skeleton className='h-10 w-full' />
               ) : (
                 <div className='text-2xl font-bold'>
                   {currentlyLoaned.toLocaleString('vi-VN', {
@@ -143,7 +143,7 @@ export default function OverViewLayout({
             </CardHeader>
             <CardContent>
               {loading ? (
-                <Skeleton />
+                <Skeleton className='h-10 w-full' />
               ) : (
                 <div className='text-2xl font-bold'>
                   {totalCollected.toLocaleString('vi-VN', {
@@ -174,7 +174,7 @@ export default function OverViewLayout({
             </CardHeader>
             <CardContent>
               {loading ? (
-                <Skeleton />
+                <Skeleton className='h-10 w-full' />
               ) : (
                 <div className='text-2xl font-bold'>
                   {totalFee.toLocaleString('vi-VN', {
@@ -207,7 +207,7 @@ export default function OverViewLayout({
             </CardHeader>
             <CardContent className='flex flex-col space-y-1'>
               {loading ? (
-                <Skeleton />
+                <Skeleton className='h-14 w-full' />
               ) : (
                 <>
                   <div className='flex items-center justify-between'>
