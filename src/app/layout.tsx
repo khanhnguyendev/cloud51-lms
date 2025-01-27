@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next';
 import { auth } from '@/lib/auth';
 import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/sonner';
@@ -8,8 +9,8 @@ import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'Cloud Shop',
+  description: ''
 };
 
 const lato = Lato({
@@ -32,6 +33,7 @@ export default async function RootLayout({
           <Providers session={session}>
             <Toaster />
             {children}
+            <Analytics />
           </Providers>
         </NuqsAdapter>
       </body>
