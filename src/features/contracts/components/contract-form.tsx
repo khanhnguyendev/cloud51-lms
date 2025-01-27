@@ -369,7 +369,9 @@ export default function ContractForm({
                           <SelectValue placeholder='Chọn loại thiết bị' />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent
+                        style={{ maxHeight: '400px', overflowY: 'auto' }}
+                      >
                         {deviceTypes.map((type) => (
                           <SelectItem key={type} value={type}>
                             {type}
