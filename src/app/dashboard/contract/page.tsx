@@ -13,7 +13,7 @@ import ContractListingPage from '@/features/contracts/components/contract-listin
 import ContractTableAction from '@/features/contracts/components/contract-tables/contract-table-action';
 
 export const metadata = {
-  title: 'Cloud51 | Hợp Đồng'
+  title: 'Cloud Shop | Hợp Đồng'
 };
 
 type pageProps = {

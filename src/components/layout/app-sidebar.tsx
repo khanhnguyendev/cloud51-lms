@@ -47,7 +47,7 @@ import * as React from 'react';
 import { Icons } from '../icons';
 
 export const company = {
-  name: 'Cloud51',
+  name: 'Cloud Shop',
   logo: GalleryVerticalEnd,
   plan: 'Quản lý hợp đồng'
 };

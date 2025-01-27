@@ -5,8 +5,8 @@ import Link from 'next/link';
 import UserAuthForm from './user-auth-form';
 
 export const metadata: Metadata = {
-  title: 'Authentication',
-  description: 'Authentication forms built using the components.'
+  title: 'Cloud Shop | Authentication',
+  description: 'Sign In page for authentication.'
 };
 
 export default function SignInViewPage({ stars }: { stars: number }) {
@@ -36,7 +36,7 @@ export default function SignInViewPage({ stars }: { stars: number }) {
           >
             <path d='M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3' />
           </svg>
-          Cloud51
+          Cloud Shop
         </div>
         {/* <div className='relative z-20 mt-auto'>
           <blockquote className='space-y-2'>
