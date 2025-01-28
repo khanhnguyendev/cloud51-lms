@@ -77,3 +77,30 @@ export async function POST(request: NextRequest) {
     return handleError(error as Error);
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const searchParams = req.nextUrl.searchParams;
+    const status = searchParams.get('status') || 'overdue';
+
+    const overdueTransactions = [
+      {
+        id: '1',
+        customerName: 'John Doe',
+        amount: 200000,
+        dueDate: '2025-01-15',
+        status
+      },
+      {
+        id: '2',
+        customerName: 'Jane Smith',
+        amount: 350000,
+        dueDate: '2025-01-20',
+        status
+      }
+    ];
+    return success(HTTP_STATUS_CODES.OK, overdueTransactions);
+  } catch (error) {
+    return handleError(error);
+  }
+}
