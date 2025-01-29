@@ -15,8 +15,7 @@ export const metadata: Metadata = {
 
 const lato = Roboto({
   subsets: ['vietnamese'],
-  weight: ['400', '700', '900'],
-  display: 'swap'
+  weight: ['400', '700', '900']
 });
 
 export default async function RootLayout({
