@@ -21,6 +21,7 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
+// Connect to the database
 async function dbConnect() {
   if (cached.conn) {
     return cached.conn;
@@ -29,8 +30,6 @@ async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 30000
     };
 
@@ -43,6 +42,7 @@ async function dbConnect() {
   return cached.conn;
 }
 
+// Create a session for database transactions
 async function createSession() {
   const db = await dbConnect();
   const session = db.startSession();
@@ -50,6 +50,7 @@ async function createSession() {
   return session;
 }
 
+// Rollback the transaction
 async function rollback(session: ClientSession) {
   try {
     await session.abortTransaction();
@@ -64,4 +65,30 @@ async function rollback(session: ClientSession) {
   }
 }
 
-export { dbConnect, createSession, rollback };
+// Initialize all Mongoose models
+async function initializeModels() {
+  try {
+    await dbConnect();
+
+    const UserModel = require('../models/user');
+    const TransactionModel = require('../models/transaction');
+    const ContractModel = require('../models/contract');
+
+    console.log('[DB] Models initialized:', {
+      UserModel,
+      TransactionModel,
+      ContractModel
+    });
+
+    return {
+      UserModel,
+      TransactionModel,
+      ContractModel
+    };
+  } catch (error) {
+    console.error('[DB] Error initializing models:', error);
+    throw new Error('Failed to initialize models');
+  }
+}
+
+export { dbConnect, createSession, rollback, initializeModels };
