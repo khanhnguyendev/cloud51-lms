@@ -1,5 +1,7 @@
 import { dbConnect } from '@/lib/db';
+import { Contract } from '@/models/contract';
 import { Transaction } from '@/models/transaction';
+import { User } from '@/models/user';
 import {
   success,
   HTTP_STATUS_CODES,
@@ -100,17 +102,30 @@ export async function GET(req: NextRequest) {
     const today = getTodayDate();
     const tomorrow = getTomorrowDate();
 
-    const transactions = await Transaction.find({
-      paidStatus: { $ne: 'PAID_ALL' }
-    })
-      .populate({
-        path: 'contractId',
-        populate: {
-          path: 'user',
-          select: 'name phones'
+    // Fetch transactions with related contract and user data in a single query
+    const transactions = await Transaction.aggregate([
+      {
+        $match: { paidStatus: { $ne: 'PAID_ALL' } }
+      },
+      {
+        $lookup: {
+          from: 'contracts',
+          localField: 'contractId',
+          foreignField: '_id',
+          as: 'contract'
         }
-      })
-      .exec();
+      },
+      { $unwind: '$contract' },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'contract.user',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' }
+    ]);
 
     const response: any = {
       overdue: [],
@@ -118,37 +133,39 @@ export async function GET(req: NextRequest) {
       upcoming: []
     };
 
-    transactions.forEach((transaction) => {
-      const dueDate = new Date(transaction.dueDate);
-      const contract = transaction.contractId;
-      const user = contract?.user;
+    // Process transactions in parallel
+    await Promise.all(
+      transactions.map(async (transaction) => {
+        const dueDate = new Date(transaction.dueDate);
+        dueDate.setHours(0, 0, 0, 0);
 
-      const customerPhone = user?.phones?.[0]?.number || '';
-      const contractResponse = {
-        _id: contract?._id.toString(),
-        contractCode: contract?.contractCode,
-        contractDate: contract?.contractDate.toISOString().split('T')[0],
-        customerName: user?.name || '',
-        customerPhone,
-        transaction: {
-          _id: transaction._id.toString(),
-          amount: transaction.amount,
-          partialAmount: transaction.partialAmount,
-          dueDate: dueDate.toISOString().split('T')[0],
-          status: transaction.paidStatus
+        const customerPhone = transaction.user?.phones?.[0]?.number || '';
+        const contractResponse = {
+          _id: transaction.contract._id.toString(),
+          contractCode: transaction.contract?.contractCode,
+          contractDate: transaction.contract?.contractDate
+            .toISOString()
+            .split('T')[0],
+          customerName: transaction.user?.name || '',
+          customerPhone,
+          transaction: {
+            _id: transaction._id.toString(),
+            amount: transaction.amount,
+            partialAmount: transaction.partialAmount,
+            dueDate: dueDate.toISOString().split('T')[0],
+            status: transaction.paidStatus
+          }
+        };
+
+        if (dueDate < today) {
+          response.overdue.push(contractResponse);
+        } else if (dueDate.getTime() === today.getTime()) {
+          response.due.push(contractResponse);
+        } else if (dueDate.getTime() === tomorrow.getTime()) {
+          response.upcoming.push(contractResponse);
         }
-      };
-
-      dueDate.setHours(0, 0, 0, 0);
-
-      if (dueDate < today) {
-        response.overdue.push(contractResponse);
-      } else if (dueDate.getTime() === today.getTime()) {
-        response.due.push(contractResponse);
-      } else if (dueDate.getTime() === tomorrow.getTime()) {
-        response.upcoming.push(contractResponse);
-      }
-    });
+      })
+    );
 
     return success(HTTP_STATUS_CODES.OK, response);
   } catch (error) {
