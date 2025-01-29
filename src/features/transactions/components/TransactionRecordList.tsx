@@ -4,6 +4,7 @@ import TransactionRecordItem from './TransactionRecordItem';
 interface TransactionRecordListProps {
   contracts: {
     _id: string;
+    contractCode: string;
     contractDate: string;
     customerName: string;
     customerPhone: string;
@@ -23,7 +24,7 @@ const TransactionRecordList: React.FC<TransactionRecordListProps> = ({
   status
 }) => {
   return (
-    <div className='max-h-[700px] space-y-4 overflow-y-auto'>
+    <div className='max-h-[750px] space-y-4 overflow-y-auto'>
       {contracts.map((contract) => (
         <TransactionRecordItem
           key={contract.transaction._id}

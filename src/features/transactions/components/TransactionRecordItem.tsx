@@ -9,10 +9,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { convertDateToDDMMYYYY } from '@/utils/date-util';
 
 interface TransactionRecordItemProps {
   contract: {
     _id: string;
+    contractCode: string;
     contractDate: string;
     customerName: string;
     customerPhone: string;
@@ -32,7 +34,6 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
   status
 }) => {
   const router = useRouter();
-  const { contractDate, customerName, customerPhone, transaction } = contract;
 
   const handleAction = (action: string) => {
     if (action === 'view') {
@@ -87,12 +88,12 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
       <CardHeader>
         <CardTitle className='flex items-center justify-between'>
           <div className='flex items-center'>
-            <span className='mr-2 text-xl'>{customerPhone}</span>
+            <span className='mr-2 text-xl'>{contract.contractCode}</span>
           </div>
           <span
-            className={`rounded-lg px-2 py-1 text-xs font-semibold ${getTransactionStatusStyle(transaction.status)}`}
+            className={`rounded-lg px-2 py-1 text-xs font-semibold ${getTransactionStatusStyle(contract.transaction.status)}`}
           >
-            {convertTransactionStatus(transaction.status)}
+            {convertTransactionStatus(contract.transaction.status)}
           </span>
         </CardTitle>
       </CardHeader>
@@ -100,7 +101,8 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
       <CardContent className='flex items-center justify-between'>
         <div className='grid grid-cols-2 gap-x-10'>
           <div>
-            <p className='text-md font-semibold text-gray-700'>Tên KH:</p>
+            <p className='text-md font-semibold text-gray-700'>Tên:</p>
+            <p className='text-md font-semibold text-gray-700'>SĐT:</p>
             <p className='text-md font-semibold text-gray-700'>Ngày đến hạn:</p>
             <p className='text-md font-semibold text-gray-700'>
               Cần thanh toán:
@@ -111,20 +113,23 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
           </div>
 
           <div>
-            <p className='text-base font-bold text-gray-900'>
+            <p className='text-base font-semibold text-gray-900'>
               {contract.customerName}
             </p>
-            <p className='text-base font-medium text-gray-900'>
-              {transaction.dueDate}
+            <p className='text-base font-semibold text-gray-900'>
+              {contract.customerPhone}
+            </p>
+            <p className='text-base font-semibold text-gray-900'>
+              {convertDateToDDMMYYYY(new Date(contract.transaction.dueDate))}
             </p>
             <p className='text-md font-semibold text-red-600'>
-              {transaction.amount.toLocaleString('vi-VN', {
+              {contract.transaction.amount.toLocaleString('vi-VN', {
                 style: 'currency',
                 currency: 'VND'
               })}
             </p>
             <p className='text-md font-semibold text-green-600'>
-              {transaction.partialAmount.toLocaleString('vi-VN', {
+              {contract.transaction.partialAmount.toLocaleString('vi-VN', {
                 style: 'currency',
                 currency: 'VND'
               })}

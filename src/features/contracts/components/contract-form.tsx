@@ -26,6 +26,7 @@ import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { IContract } from '@/models/contract';
 import { ITransaction } from '@/models/transaction';
+import { convertDateToDDMMYYYY } from '@/utils/date-util';
 
 const formSchema = z.object({
   contractDate: z
@@ -70,6 +71,7 @@ export default function ContractForm({
       partialAmount: number;
       dueDate: string;
       paidStatus: string;
+      paidDate: string;
     }[]
   >([]);
 
@@ -133,6 +135,7 @@ export default function ContractForm({
           _id: transaction._id,
           amount: transaction.amount,
           partialAmount: transaction.partialAmount || 0,
+          dueDate: convertDateToDDMMYYYY(new Date(transaction.dueDate)),
           paidStatus: transaction.paidStatus || 'NOT_PAID'
         })
       );
@@ -172,6 +175,7 @@ export default function ContractForm({
           _id: '',
           amount: installmentValue,
           dueDate: date.toLocaleDateString('vi-VN'),
+          paidDate: '',
           partialAmount: 0,
           paidStatus: 'NOT_PAID'
         };

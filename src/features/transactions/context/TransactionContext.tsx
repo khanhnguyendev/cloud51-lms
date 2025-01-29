@@ -8,6 +8,7 @@ interface TransactionsResponse {
 
 interface Contract {
   _id: string;
+  contractCode: string;
   contractDate: string;
   customerName: string;
   customerPhone: string;

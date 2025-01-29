@@ -126,6 +126,7 @@ export async function GET(req: NextRequest) {
       const customerPhone = user?.phones?.[0]?.number || '';
       const contractResponse = {
         _id: contract?._id.toString(),
+        contractCode: contract?.contractCode,
         contractDate: contract?.contractDate.toISOString().split('T')[0],
         customerName: user?.name || '',
         customerPhone,
