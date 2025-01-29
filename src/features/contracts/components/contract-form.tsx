@@ -68,7 +68,7 @@ export default function ContractForm({
       _id: string;
       amount: number;
       partialAmount: number;
-      paymentDate: string;
+      dueDate: string;
       paidStatus: string;
     }[]
   >([]);
@@ -133,9 +133,7 @@ export default function ContractForm({
           _id: transaction._id,
           amount: transaction.amount,
           partialAmount: transaction.partialAmount || 0,
-          paymentDate: new Date(transaction.paymentDate)
-            .toISOString()
-            .split('T')[0],
+          dueDate: new Date(transaction.dueDate).toISOString().split('T')[0],
           paidStatus: transaction.paidStatus || 'NOT_PAID'
         })
       );
@@ -174,7 +172,7 @@ export default function ContractForm({
         return {
           _id: '',
           amount: installmentValue,
-          paymentDate: date.toLocaleDateString('vi-VN'),
+          dueDate: date.toLocaleDateString('vi-VN'),
           partialAmount: 0,
           paidStatus: 'NOT_PAID'
         };
@@ -477,7 +475,7 @@ export default function ContractForm({
                                 Kỳ {index + 1}
                               </p>
                               <p className='text-sm text-gray-500 dark:text-gray-400'>
-                                Ngày: {installment.paymentDate}
+                                Ngày: {installment.dueDate}
                               </p>
                               <p className='text-sm font-medium text-red-600 dark:text-red-400'>
                                 {installment.amount.toLocaleString()} VND

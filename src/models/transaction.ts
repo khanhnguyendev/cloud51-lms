@@ -5,7 +5,7 @@ export interface ITransaction extends Document {
   userId: string;
   amount: number;
   partialAmount: number;
-  paymentDate: Date;
+  dueDate: Date;
   paidStatus: string;
   status: string;
   note: string;
@@ -33,7 +33,7 @@ const TransactionSchema: Schema = new mongoose.Schema(
       required: true, // The amount of money being paid
       default: 0
     },
-    paymentDate: {
+    dueDate: {
       type: Date,
       required: true // The date when the payment was made
     },

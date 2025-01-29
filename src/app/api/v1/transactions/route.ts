@@ -24,13 +24,13 @@ export async function POST(request: NextRequest) {
 
     const updateResults = [];
     for (const update of updates) {
-      const { _id, amount, partialAmount, paymentDate, paidStatus } = update;
+      const { _id, amount, partialAmount, dueDate, paidStatus } = update;
 
       if (
         !_id ||
         amount == null ||
         partialAmount == null ||
-        !paymentDate ||
+        !dueDate ||
         !paidStatus
       ) {
         return errorResponse(
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
       transaction.amount = amount;
       transaction.partialAmount = partialAmount;
-      transaction.paymentDate = new Date(paymentDate);
+      transaction.dueDate = new Date(dueDate);
       transaction.paidStatus = paidStatus;
       transaction.updatedAt = new Date();
 
@@ -80,33 +80,32 @@ export async function POST(request: NextRequest) {
 
 function getTodayDate(): Date {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set to start of the day
+  today.setHours(0, 0, 0, 0);
   return today;
 }
 
 function getTomorrowDate(): Date {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0); // Set to start of the day
+  tomorrow.setHours(0, 0, 0, 0);
   return tomorrow;
 }
 
 export async function GET(req: NextRequest) {
   try {
-    await dbConnect(); // Connect to MongoDB
+    await dbConnect();
 
     const today = getTodayDate();
     const tomorrow = getTomorrowDate();
 
-    // Fetch transactions that are not fully paid
     const transactions = await Transaction.find({
-      paidStatus: { $ne: 'PAID_ALL' } // Only include transactions that are not fully paid
+      paidStatus: { $ne: 'PAID_ALL' }
     })
       .populate({
         path: 'contractId',
         populate: {
           path: 'user',
-          select: 'name phones' // Only select name and phones fields from the User model
+          select: 'name phones'
         }
       })
       .exec();
@@ -118,7 +117,7 @@ export async function GET(req: NextRequest) {
     };
 
     transactions.forEach((transaction) => {
-      const paymentDate = new Date(transaction.paymentDate);
+      const dueDate = new Date(transaction.dueDate);
       const contract = transaction.contractId;
       const user = contract?.user;
 
@@ -132,22 +131,18 @@ export async function GET(req: NextRequest) {
           _id: transaction._id.toString(),
           amount: transaction.amount,
           partialAmount: transaction.partialAmount,
-          dueDate: paymentDate.toISOString().split('T')[0],
+          dueDate: dueDate.toISOString().split('T')[0],
           status: transaction.paidStatus
         }
       };
 
-      if (paymentDate < today) {
+      dueDate.setHours(0, 0, 0, 0);
+
+      if (dueDate < today) {
         response.overdue.push(contractResponse);
-      } else if (
-        paymentDate.toISOString().split('T')[0] ===
-        today.toISOString().split('T')[0]
-      ) {
+      } else if (dueDate.getTime() === today.getTime()) {
         response.due.push(contractResponse);
-      } else if (
-        paymentDate.toISOString().split('T')[0] ===
-        tomorrow.toISOString().split('T')[0]
-      ) {
+      } else if (dueDate.getTime() === tomorrow.getTime()) {
         response.upcoming.push(contractResponse);
       }
     });

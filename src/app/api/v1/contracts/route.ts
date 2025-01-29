@@ -285,9 +285,8 @@ async function createTransactions(
     contractType: contract.contractType,
     userId: user._id,
     totalAmount: installment.amount,
-    paymentDate: new Date(installment.date),
+    dueDate: new Date(installment.date),
     amount: installment.amount,
-    dueDate: dueDate,
     createdAt: new Date(),
     updatedAt: new Date()
   }));
