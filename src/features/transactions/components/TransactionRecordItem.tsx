@@ -18,14 +18,17 @@ interface TransactionRecordItemProps {
     transaction: {
       _id: string;
       amount: number;
+      partialAmount: number;
       dueDate: string;
       status: string;
     };
   };
+  status: 'overdue' | 'due' | 'upcoming';
 }
 
 const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
-  contract
+  contract,
+  status
 }) => {
   const { contractDate, customerName, customerPhone, transaction } = contract;
 
@@ -49,13 +52,25 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
     }
   };
 
+  const getTransactionStatusStyle = (status: string) => {
+    switch (status) {
+      case 'NOT_PAID':
+        return 'text-gray-500 bg-gray-100';
+      case 'PAID_ALL':
+        return 'text-green-500 bg-green-100';
+      case 'PARTIALLY_PAID':
+        return 'text-blue-500 bg-blue-100';
+      default:
+    }
+  };
+
   return (
-    <Card className={`border ${getStatusStyle(transaction.status)} rounded-lg`}>
+    <Card className={`border ${getStatusStyle(status)} rounded-lg`}>
       <CardHeader>
         <CardTitle className='flex items-center justify-between'>
           {customerName} - {customerPhone}
           <span
-            className={`rounded-lg px-2 py-1 text-xs font-semibold ${getStatusStyle(
+            className={`rounded-lg px-2 py-1 text-xs font-semibold ${getTransactionStatusStyle(
               transaction.status
             )}`}
           >
@@ -70,6 +85,13 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
           <p className='text-sm font-medium'>
             Amount:{' '}
             {transaction.amount.toLocaleString('vi-VN', {
+              style: 'currency',
+              currency: 'VND'
+            })}
+          </p>
+          <p className='text-sm font-medium'>
+            Partial Amount:{' '}
+            {transaction.partialAmount.toLocaleString('vi-VN', {
               style: 'currency',
               currency: 'VND'
             })}

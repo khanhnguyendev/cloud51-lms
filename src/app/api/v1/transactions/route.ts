@@ -78,66 +78,81 @@ export async function POST(request: NextRequest) {
   }
 }
 
+function getTodayDate(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of the day
+  return today;
+}
+
+function getTomorrowDate(): Date {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0); // Set to start of the day
+  return tomorrow;
+}
+
 export async function GET(req: NextRequest) {
   try {
-    const transactions = {
-      overdue: [
-        {
-          _id: '1',
-          contractDate: '2024-12-01',
-          customerName: 'John Doe',
-          customerPhone: '0123456789',
-          transaction: {
-            _id: 't1',
-            amount: 200000,
-            dueDate: '2025-01-15',
-            status: 'overdue'
-          }
-        },
-        {
-          _id: '2',
-          contractDate: '2024-12-05',
-          customerName: 'Jane Smith',
-          customerPhone: '0987654321',
-          transaction: {
-            _id: 't2',
-            amount: 350000,
-            dueDate: '2025-01-20',
-            status: 'overdue'
-          }
+    await dbConnect(); // Connect to MongoDB
+
+    const today = getTodayDate();
+    const tomorrow = getTomorrowDate();
+
+    // Fetch transactions that are not fully paid
+    const transactions = await Transaction.find({
+      paidStatus: { $ne: 'PAID_ALL' } // Only include transactions that are not fully paid
+    })
+      .populate({
+        path: 'contractId',
+        populate: {
+          path: 'user',
+          select: 'name phones' // Only select name and phones fields from the User model
         }
-      ],
-      due: [
-        {
-          _id: '3',
-          contractDate: '2025-01-01',
-          customerName: 'Alice Brown',
-          customerPhone: '0111222333',
-          transaction: {
-            _id: 't3',
-            amount: 150000,
-            dueDate: '2025-02-01',
-            status: 'due'
-          }
-        }
-      ],
-      upcoming: [
-        {
-          _id: '4',
-          contractDate: '2025-01-10',
-          customerName: 'Bob White',
-          customerPhone: '0222333444',
-          transaction: {
-            _id: 't4',
-            amount: 500000,
-            dueDate: '2025-03-10',
-            status: 'upcoming'
-          }
-        }
-      ]
+      })
+      .exec();
+
+    const response: any = {
+      overdue: [],
+      due: [],
+      upcoming: []
     };
 
-    return success(HTTP_STATUS_CODES.OK, transactions);
+    transactions.forEach((transaction) => {
+      const paymentDate = new Date(transaction.paymentDate);
+      const contract = transaction.contractId;
+      const user = contract?.user;
+
+      const customerPhone = user?.phones?.[0]?.number || '';
+      const contractResponse = {
+        _id: contract?._id.toString(),
+        contractDate: contract?.contractDate.toISOString().split('T')[0],
+        customerName: user?.name || '',
+        customerPhone,
+        transaction: {
+          _id: transaction._id.toString(),
+          amount: transaction.amount,
+          partialAmount: transaction.partialAmount,
+          dueDate: paymentDate.toISOString().split('T')[0],
+          status: transaction.paidStatus
+        }
+      };
+
+      if (paymentDate < today) {
+        response.overdue.push(contractResponse);
+      } else if (
+        paymentDate.toISOString().split('T')[0] ===
+        today.toISOString().split('T')[0]
+      ) {
+        response.due.push(contractResponse);
+      } else if (
+        paymentDate.toISOString().split('T')[0] ===
+        tomorrow.toISOString().split('T')[0]
+      ) {
+        response.upcoming.push(contractResponse);
+      }
+    });
+
+    return success(HTTP_STATUS_CODES.OK, response);
   } catch (error) {
     return handleError(error);
   }

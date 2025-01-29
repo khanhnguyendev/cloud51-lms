@@ -17,7 +17,7 @@ const TransactionPage: React.FC<TransactionPageProps> = ({ status, title }) => {
       {loading ? (
         <FormCardSkeleton />
       ) : (
-        <TransactionRecordList contracts={contracts[status]} />
+        <TransactionRecordList contracts={contracts[status]} status={status} />
       )}
     </div>
   );

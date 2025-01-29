@@ -14,6 +14,7 @@ interface Contract {
   transaction: {
     _id: string;
     amount: number;
+    partialAmount: number;
     dueDate: string;
     status: string;
   };

@@ -10,14 +10,17 @@ interface TransactionRecordListProps {
     transaction: {
       _id: string;
       amount: number;
+      partialAmount: number;
       dueDate: string;
       status: string;
     };
   }[];
+  status: 'overdue' | 'due' | 'upcoming';
 }
 
 const TransactionRecordList: React.FC<TransactionRecordListProps> = ({
-  contracts
+  contracts,
+  status
 }) => {
   return (
     <div className='space-y-4'>
@@ -25,6 +28,7 @@ const TransactionRecordList: React.FC<TransactionRecordListProps> = ({
         <TransactionRecordItem
           key={contract.transaction._id}
           contract={contract}
+          status={status}
         />
       ))}
     </div>
