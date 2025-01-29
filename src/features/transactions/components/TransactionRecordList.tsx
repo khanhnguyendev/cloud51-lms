@@ -2,22 +2,30 @@ import React from 'react';
 import TransactionRecordItem from './TransactionRecordItem';
 
 interface TransactionRecordListProps {
-  transactions: {
-    id: string;
+  contracts: {
+    _id: string;
+    contractDate: string;
     customerName: string;
-    amount: number;
-    dueDate: string;
-    status: string;
+    customerPhone: string;
+    transaction: {
+      _id: string;
+      amount: number;
+      dueDate: string;
+      status: string;
+    };
   }[];
 }
 
 const TransactionRecordList: React.FC<TransactionRecordListProps> = ({
-  transactions
+  contracts
 }) => {
   return (
     <div className='space-y-4'>
-      {transactions.map((transaction) => (
-        <TransactionRecordItem key={transaction.id} transaction={transaction} />
+      {contracts.map((contract) => (
+        <TransactionRecordItem
+          key={contract.transaction._id}
+          contract={contract}
+        />
       ))}
     </div>
   );

@@ -1,15 +1,27 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback
-} from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+interface TransactionsResponse {
+  overdue: Contract[];
+  due: Contract[];
+  upcoming: Contract[];
+}
+
+interface Contract {
+  _id: string;
+  contractDate: string;
+  customerName: string;
+  customerPhone: string;
+  transaction: {
+    _id: string;
+    amount: number;
+    dueDate: string;
+    status: string;
+  };
+}
 
 interface TransactionContextType {
-  transactions: any[];
+  contracts: TransactionsResponse;
   loading: boolean;
-  fetchTransactions: (status: string) => void;
 }
 
 const TransactionContext = createContext<TransactionContextType | undefined>(
@@ -29,33 +41,32 @@ export const useTransactionData = () => {
 export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({
   children
 }) => {
-  const [transactions, setTransactions] = useState([]);
+  const [contracts, setContracts] = useState<TransactionsResponse>({
+    overdue: [],
+    due: [],
+    upcoming: []
+  });
   const [loading, setLoading] = useState(true);
 
-  const fetchTransactions = useCallback(async (status: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/v1/transactions/?status=${status}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const json = await response.json();
-      const data = json.message;
-      setTransactions(data || []);
-    } catch (error) {
-      console.error(
-        `Failed to fetch transactions for status "${status}":`,
-        error
-      );
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    async function fetchTransactions() {
+      try {
+        const response = await fetch('/api/v1/transactions');
+        const json = await response.json();
+        const data: TransactionsResponse = json.message;
+        setContracts(data);
+      } catch (error) {
+        console.error('Failed to fetch transactions:', error);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    fetchTransactions();
   }, []);
 
   return (
-    <TransactionContext.Provider
-      value={{ transactions, loading, fetchTransactions }}
-    >
+    <TransactionContext.Provider value={{ contracts, loading }}>
       {children}
     </TransactionContext.Provider>
   );
