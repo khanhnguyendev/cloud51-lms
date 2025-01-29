@@ -4,7 +4,7 @@ import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import { Lato } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 
@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   description: ''
 };
 
-const lato = Lato({
-  subsets: ['latin'],
+const lato = Roboto({
+  subsets: ['vietnamese'],
   weight: ['400', '700', '900'],
   display: 'swap'
 });

@@ -1,6 +1,7 @@
 'use client';
 
 import PageContainer from '@/components/layout/page-container';
+import { Separator } from '@/components/ui/separator';
 import OverViewPage from '@/features/overview/components/overview';
 import { OverviewProvider } from '@/features/overview/context/overview-context';
 import { TransactionProvider } from '@/features/transactions/context/TransactionContext';
@@ -21,9 +22,9 @@ export default function OverViewLayout({
   return (
     <PageContainer>
       <div className='flex flex-1 flex-col space-y-5'>
-        <div className='flex items-center justify-between space-y-2'>
+        {/* <div className='flex items-center justify-between space-y-2'>
           <h2 className='text-2xl font-bold tracking-tight'>Hi, Cloud Shop</h2>
-        </div>
+        </div> */}
 
         <OverviewProvider>
           <OverViewPage />

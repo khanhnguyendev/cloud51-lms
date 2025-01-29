@@ -23,7 +23,7 @@ const TransactionRecordList: React.FC<TransactionRecordListProps> = ({
   status
 }) => {
   return (
-    <div className='space-y-4'>
+    <div className='max-h-[700px] space-y-4 overflow-y-auto'>
       {contracts.map((contract) => (
         <TransactionRecordItem
           key={contract.transaction._id}

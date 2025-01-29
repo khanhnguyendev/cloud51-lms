@@ -133,7 +133,6 @@ export default function ContractForm({
           _id: transaction._id,
           amount: transaction.amount,
           partialAmount: transaction.partialAmount || 0,
-          dueDate: new Date(transaction.dueDate).toISOString().split('T')[0],
           paidStatus: transaction.paidStatus || 'NOT_PAID'
         })
       );

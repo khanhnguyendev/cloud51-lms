@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     if (!Array.isArray(updates)) {
       return errorResponse(
         HTTP_STATUS_CODES.BAD_REQUEST,
-        'Invalid data format',
+        'Dữ liệu không hợp lệ',
         'Expected an array of transaction updates'
       );
     }
@@ -24,19 +24,21 @@ export async function POST(request: NextRequest) {
 
     const updateResults = [];
     for (const update of updates) {
-      const { _id, amount, partialAmount, dueDate, paidStatus } = update;
+      const { _id, amount, partialAmount, paidStatus } = update;
 
-      if (
-        !_id ||
-        amount == null ||
-        partialAmount == null ||
-        !dueDate ||
-        !paidStatus
-      ) {
+      if (!_id || amount == null || partialAmount == null || !paidStatus) {
         return errorResponse(
           HTTP_STATUS_CODES.BAD_REQUEST,
           'Dữ liệu không hợp lệ',
           `Transaction with _id ${_id} has incomplete fields`
+        );
+      }
+
+      if (paidStatus === 'PAID_ALL' && partialAmount < amount) {
+        return errorResponse(
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          'Số tiền thanh toán không hợp lệ',
+          `Transaction with _id ${_id} has invalid amount and partialAmount`
         );
       }
 
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
 
       transaction.amount = amount;
       transaction.partialAmount = partialAmount;
-      transaction.dueDate = new Date(dueDate);
+      transaction.paidDate = new Date();
       transaction.paidStatus = paidStatus;
       transaction.updatedAt = new Date();
 

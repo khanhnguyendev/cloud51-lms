@@ -34,8 +34,12 @@ const TransactionSchema: Schema = new mongoose.Schema(
       default: 0
     },
     dueDate: {
-      type: Date,
-      required: true // The date when the payment was made
+      type: Date, // The date when the money should be paid
+      required: true
+    },
+    paidDate: {
+      type: Date, // The date when the money has been paid
+      default: null
     },
     paidStatus: {
       type: String,
