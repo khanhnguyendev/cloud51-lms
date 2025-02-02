@@ -98,7 +98,10 @@ export default function ContractForm({
     'iPhone 12 Pro Max',
     'iPhone 11',
     'iPhone 11 Pro',
-    'iPhone 11 Pro Max'
+    'iPhone 11 Pro Max',
+    'iPhone XR',
+    'iPhone XS',
+    'iPhone XS Max'
   ];
 
   const defaultValues = {
