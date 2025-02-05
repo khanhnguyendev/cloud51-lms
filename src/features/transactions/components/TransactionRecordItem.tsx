@@ -48,28 +48,28 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'overdue':
-        return 'text-red-500 bg-red-100';
+        return 'text-red-500 bg-red-100 dark:text-red-800 dark:bg-red-300';
       case 'due':
-        return 'text-yellow-500 bg-yellow-100';
+        return 'text-yellow-500 bg-yellow-100 dark:text-yellow-800 dark:bg-yellow-300';
       case 'upcoming':
-        return 'text-green-500 bg-green-100';
+        return 'text-green-500 bg-green-100 dark:text-green-800 dark:bg-green-300';
       default:
-        return 'text-gray-500 bg-gray-100';
+        return 'text-gray-500 bg-gray-100 dark:text-gray-300 dark:bg-gray-800';
     }
   };
 
   const getTransactionStatusStyle = (status: string) => {
     switch (status) {
       case 'NOT_PAID':
-        return 'text-red-500 bg-red-200';
+        return 'text-red-500 bg-red-200 dark:text-red-400 dark:bg-red-800';
       case 'PAID_ALL':
-        return 'text-green-500 bg-green-100';
+        return 'text-green-500 bg-green-100 dark:text-green-400 dark:bg-green-800';
       case 'PARTIALLY_PAID':
-        return 'text-blue-500 bg-blue-100';
+        return 'text-blue-500 bg-blue-100 dark:text-blue-400 dark:bg-blue-800';
       default:
+        return '';
     }
   };
-
   const convertTransactionStatus = (status: string) => {
     switch (status) {
       case 'NOT_PAID':
@@ -99,7 +99,7 @@ const TransactionRecordItem: React.FC<TransactionRecordItemProps> = ({
       </CardHeader>
 
       <CardContent className='flex items-center justify-between'>
-        <div className='grid grid-cols-2 gap-x-10'>
+        <div className='flex gap-x-10'>
           <div>
             <p className='text-md font-semibold text-gray-700'>Tên:</p>
             <p className='text-md font-semibold text-gray-700'>SĐT:</p>
