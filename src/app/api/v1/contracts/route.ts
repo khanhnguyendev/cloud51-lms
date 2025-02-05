@@ -250,7 +250,10 @@ async function validateContractInputs(
   }
 
   // Check if IMEI is already in use by another contract
-  const existingImeiContract = await Contract.findOne({ deviceImei });
+  const existingImeiContract = await Contract.findOne({
+    deviceImei,
+    deletedAt: null
+  });
   if (existingImeiContract) {
     throw new BadRequestError(IMEI_EXISTING);
   }
