@@ -26,6 +26,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onConfirm = async () => {
     setLoading(true);
+    let onError = false;
     const deleteContract = async () => {
       const res = await fetch(`/api/v1/contracts/${data._id}`, {
         method: 'DELETE',
@@ -34,6 +35,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
       if (!res.ok) {
         const errorRes = await res.json();
+        onError = true;
         throw new Error(errorRes?.error || 'Unknown error occurred');
       }
 
@@ -42,18 +44,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     };
 
     try {
-      await toast.promise(deleteContract(), {
+      toast.promise(deleteContract(), {
         loading: 'Đang xoá hợp đồng...',
         success: 'Xoá hợp đồng thành công!',
         error: (error: Error) => error.message || 'Xoá hợp đồng thất bại!'
       });
 
       setOpen(false);
-      window.location.reload();
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
+      if (!onError) window.location.reload();
     }
   };
 

@@ -116,6 +116,10 @@ export async function GET(req: NextRequest) {
         }
       },
       { $unwind: '$contract' },
+      // Filter contract with deletedAt is null
+      {
+        $match: { 'contract.deletedAt': null }
+      },
       {
         $lookup: {
           from: 'users',
