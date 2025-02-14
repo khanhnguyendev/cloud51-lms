@@ -23,6 +23,10 @@ if (!cached) {
 
 // Connect to the database
 async function dbConnect() {
+  require('../models/user');
+  require('../models/transaction');
+  require('../models/contract');
+
   if (cached.conn) {
     return cached.conn;
   }
