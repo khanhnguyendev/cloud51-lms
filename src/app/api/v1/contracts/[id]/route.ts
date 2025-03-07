@@ -77,3 +77,44 @@ export async function DELETE(
     return handleError(error);
   }
 }
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const contractId = (await params).id;
+    const body = await req.json();
+    console.log(`body:::${body}`);
+
+    console.log(`Updating contract with id: ${contractId}...`);
+
+    await dbConnect();
+
+    const contract = await Contract.findById(contractId);
+
+    if (!contract) {
+      return errorResponse(
+        HTTP_STATUS_CODES.NOT_FOUND,
+        'Contract not found',
+        `Contract with id ${contractId} not found`
+      );
+    }
+
+    Object.keys(body).forEach((key) => {
+      if (body[key] !== undefined) {
+        contract[key] = body[key];
+      }
+    });
+
+    await contract.save();
+
+    console.log(`Updated contract with id: ${contractId} successfully`);
+
+    revalidatePath('/');
+
+    return success(HTTP_STATUS_CODES.OK, contract);
+  } catch (error) {
+    return handleError(error);
+  }
+}

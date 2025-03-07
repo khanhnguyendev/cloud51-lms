@@ -153,6 +153,35 @@ export default function ContractForm({
     form.watch('contractDate')
   ]);
 
+  useEffect(() => {
+    const note = form.watch('note');
+
+    // Only proceed if the note has changed
+    if (note !== initialData?.note && action === 'update') {
+      // Debounce API call (wait 500ms before sending request)
+      const timeout = setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/v1/contracts/${initialData._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ note })
+          });
+
+          if (!response.ok) {
+            const errorRes = await response.json();
+            throw new Error(errorRes?.error || 'Unknown error occurred');
+          }
+
+          toast.success('Ghi chú đã được cập nhật thành công!');
+        } catch (error: any) {
+          toast.error(error.message || 'Cập nhật ghi chú thất bại!');
+        }
+      }, 500); // 500ms delay
+
+      return () => clearTimeout(timeout); // Cleanup if user types again before timeout
+    }
+  }, [form.watch('note')]);
+
   const calculateFeeAndInstallments = (
     totalAmount: number,
     contractType: string,
@@ -443,7 +472,7 @@ export default function ContractForm({
                 <div>{fee.toLocaleString()} VND</div>
               </FormItem> */}
               {/* Note */}
-              {/* <FormField
+              <FormField
                 control={form.control}
                 name='note'
                 render={({ field }) => (
@@ -455,7 +484,7 @@ export default function ContractForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              /> */}
+              />
 
               <Card className='mx-auto w-full'>
                 <CardHeader>
